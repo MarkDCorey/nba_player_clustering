@@ -1,6 +1,7 @@
 # nba_player_clustering
 
-High level description of the project
+PROJECT DESCRIPTION
+
 o	Determine whether we can meaningfully cluster players NBA players by "type"
 o	Use this info to determine whether there are optimal compositions of player types when forming teams and lineups?  If there are optimal compositions, we can potentially....
 o	identify latent improvement opportunities for any team (eg new lineups to test, prioritization of players to pursue via free-agency or trade).
@@ -8,7 +9,9 @@ o	predict any player's value to any team.
 o	determine whether optimal team/lineup compositions have changed over time.
 o	determine whether new trends in team/lineup compositions are developing.
 
-Outline of process
+
+PROCESS OUTLINE
+
 o	Identify player feature set and k value, and build player clusters.
 o	Merge the resulting cluster labels with NBA's lineup data
 o	Translate each lineup into appropriate cluster labels
