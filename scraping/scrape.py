@@ -11,9 +11,12 @@ import time
 '''
 
 #get a list of all the active player ids
-players_2016_17 = player.PlayerList(season = '2016-17', only_current = 1).info()
-player_ids = [players_2016_17.PERSON_ID.iloc[i] for i in range(players_2016_17.shape[0])]
-player_ids.sort()
+def get_player_ids():
+    players_2016_17 = player.PlayerList(season = '2016-17', only_current = 1).info()
+    player_ids = [players_2016_17.PERSON_ID.iloc[i] for i in range(players_2016_17.shape[0])]
+    player_ids.sort()
+    return player_ids
+
 
 #FEATURES
 #summary info...
@@ -47,11 +50,15 @@ def append_player_summary_info(df, player_id_list):
 
 
 if __name__ == '__main__':
+    #create ordered list of player ids
+    player_ids = get_player_ids()
+
     #create empty master df
     player_summary_data = pd.DataFrame(columns = ['player_id', 'first_name',
                                               'last_name', 'display_name',
                                               'age', 'season_exp', 'position',
                                               'roster_status', 'team_id',
                                               'team_name', 'dleague_flag'])
+
     #scrape summary data and append to master df
     summary_df = append_player_summary_info(player_summary_data, player_ids[:5])
