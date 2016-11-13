@@ -396,7 +396,8 @@ def generate_pass_df(player_id_lst, year):
 
 if __name__ == '__main__':
     #create ordered list of player ids
-    player_ids = get_player_ids('2015-16')
+    year = '2015-16'
+    player_ids = get_player_ids(year = year)
 
     #clean and munge
     summary_df = generate_player_summary_df(player_ids)
