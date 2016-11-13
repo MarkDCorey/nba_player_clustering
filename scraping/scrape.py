@@ -14,10 +14,20 @@ import time
 
 '''
 
-#get a list of all the active player ids
-def get_player_ids():
-    players_2016_17 = player.PlayerList(season = '2016-17', only_current = 1).info()
-    player_ids = [players_2016_17.PERSON_ID.iloc[i] for i in range(players_2016_17.shape[0])]
+#get a list of the player ids for a given season
+def get_player_ids(year = '2016-17', only_curr = 0):
+    players = player.PlayerList(season = year, only_current = only_curr ).info()
+
+    year_start = int(year[0:4])
+    year_end = int('20'+year[-2:])
+
+    players.FROM_YEAR = pd.to_numeric(players.FROM_YEAR)
+    players.TO_YEAR = pd.to_numeric(players.TO_YEAR)
+
+    player_ids = []
+    for i in range(players.shape[0]):
+        if (players.FROM_YEAR.iloc[i] <= year_end) and (players.TO_YEAR.iloc[i] >= year_end):
+            player_ids.append(players.PERSON_ID.iloc[i])
     player_ids.sort()
     return player_ids
 
@@ -386,19 +396,17 @@ def generate_pass_df(player_id_lst, year):
 
 if __name__ == '__main__':
     #create ordered list of player ids
-    player_ids = get_player_ids()
-    player_ids_use = player_ids[:5]
-    year = '2015-16'
+    player_ids = get_player_ids('2015-16')
 
     #clean and munge
-    summary_df = generate_player_summary_df(player_ids_use)
-    shot_df = generate_player_shot_df(player_ids_use,year)
-    catch_shoot_df = generate_catch_shoot_df(player_ids_use, year)
-    overalls_df = generate_overalls_df(player_ids_use,year)
-    rebounding_df = generate_rebounding_df(player_ids_use,year)
-    speed_dist_df = generate_speed_dist_df(player_ids_use, year)
-    defense_df = generate_defense_df(player_ids_use, year)
-    pass_df = generate_pass_df(player_ids_use, year)
+    summary_df = generate_player_summary_df(player_ids)
+    shot_df = generate_player_shot_df(player_ids,year)
+    catch_shoot_df = generate_catch_shoot_df(player_ids, year)
+    overalls_df = generate_overalls_df(player_ids,year)
+    rebounding_df = generate_rebounding_df(player_ids,year)
+    speed_dist_df = generate_speed_dist_df(player_ids, year)
+    defense_df = generate_defense_df(player_ids, year)
+    pass_df = generate_pass_df(player_ids, year)
 
     #create master df
     merged_df = pd.concat([summary_df, shot_df, catch_shoot_df, overalls_df, \
