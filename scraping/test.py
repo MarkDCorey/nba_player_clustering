@@ -64,27 +64,73 @@ player_ids = get_player_ids()
 
 
 
-def generate_rebounding_df(player_id_lst,year):
+# def generate_rebounding_df(player_id_lst,year):
+#     lst_of_dicts = []
+#     for id in player_id_lst:
+#         rebounding = player.PlayerReboundTracking(id, season=year).num_contested_rebounding()
+#         c_oreb_game = float(rebounding.C_OREB.sum())
+#         c_dreb_game = float(rebounding.C_DREB.sum())
+#
+#         lst_of_dicts.append({'player_id':id,'c_oreb_game':c_oreb_game,'c_dreb_game':c_dreb_game})
+#         time.sleep(1)
+#     rebounding_df = pd.DataFrame(lst_of_dicts)
+#     return rebounding_df
+#
+# test = generate_rebounding_df(['201939'], '2015-16')
+
+# def generate_defense_df(player_id_lst, year):
+#     lst_of_dicts = []
+#     for id in player_id_lst:
+#         pass
+
+
+# def generate_speed_dist_df(player_id_lst,year):
+#
+#     lst_of_dicts = []
+#
+#     for id in player_id_lst:
+#         player_defense = player.PlayerDefenseTracking(id).overall()
+#
+#         d_fgm_overall = float(player_defense.D_FGM[player_defense.DEFENSE_CATEGORY == 'Overall'])
+#         d_fga_overall = float(player_defense.D_FGA[player_defense.DEFENSE_CATEGORY == 'Overall'])
+#         d_ppm_overall = float(player_defense.PCT_PLUSMINUS[player_defense.DEFENSE_CATEGORY == 'Overall'])
+#
+#         d_fgm_paint = float(player_defense.D_FGM[player_defense.DEFENSE_CATEGORY == 'Less Than 6 Ft'])
+#         d_fga_paint = float(player_defense.D_FGA[player_defense.DEFENSE_CATEGORY == 'Less Than 6 Ft'])
+#         d_ppm_paint = float(player_defense.PCT_PLUSMINUS[player_defense.DEFENSE_CATEGORY == 'Less Than 6 Ft'])
+#
+#         d_fgm_perim = float(player_defense.D_FGM[player_defense.DEFENSE_CATEGORY == 'Greater Than 15 Ft'])
+#         d_fga_perim = float(player_defense.D_FGA[player_defense.DEFENSE_CATEGORY == 'Greater Than 15 Ft'])
+#         d_ppm_perim = float(player_defense.PCT_PLUSMINUS[player_defense.DEFENSE_CATEGORY == 'Greater Than 15 Ft'])
+#
+#         lst_of_dicts.append({'player_id':id,
+#                         'd_fgm_overall':d_fgm_overall,'d_fga_overall':d_fga_overall,'d_ppm_overall':d_ppm_overall,
+#                         'd_fgm_paint':d_fgm_paint,'d_fga_paint':d_fga_paint,'d_ppm_paint':d_ppm_paint,
+#                         'd_fgm_perim':d_fgm_perim,'d_fga_perim':d_fga_perim,'d_ppm_perim':d_ppm_perim
+#                         })
+#         time.sleep(1)
+#
+#     defense_df = pd.DataFrame(lst_of_dicts)
+#     return defense_df
+
+
+
+
+def generate_pass_df(player_id_lst, year):
     lst_of_dicts = []
+
     for id in player_id_lst:
-        rebounding = player.PlayerReboundTracking(id, season=year).num_contested_rebounding()
-        c_oreb_game = float(rebounding.C_OREB.sum())
-        c_dreb_game = float(rebounding.C_DREB.sum())
-
-        lst_of_dicts.append({'player_id':id,'c_oreb_game':c_oreb_game,'c_dreb_game':c_dreb_game})
+        player_pass = player.PlayerPassTracking(id, season = year).passes_made()
+        passes = (player_pass.PASS * player_pass.G)
+        pass_total = passes.sum() 
+        lst_of_dicts.append({'player_id':str(id),'pass_total':float(pass_total)})
         time.sleep(1)
-    rebounding_df = pd.DataFrame(lst_of_dicts)
-    return rebounding_df
 
-test = generate_rebounding_df(['201939'], '2015-16')
+    pass_df = pd.DataFrame(lst_of_dicts)
+    pass_df.set_index('player_id',inplace = True, drop = True)
+    return pass_df
 
-
-
-
-
-
-
-
+test = generate_pass_df(player_ids[:5], '2015-16')
 
 #
 # if __name__ == '__main__':

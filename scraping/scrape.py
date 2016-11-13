@@ -24,11 +24,7 @@ def get_player_ids():
 
 def generate_player_summary_df(player_id_list):
 
-    player_summary_df = pd.DataFrame(columns = ['player_id', 'first_name',
-                                              'last_name', 'display_name',
-                                              'age', 'season_exp', 'position',
-                                              'roster_status', 'team_id',
-                                              'team_name', 'dleague_flag'])
+    lst_of_dicts = []
 
     for id in player_id_list:
         player_summary = player.PlayerSummary(player_id = id).info()
@@ -44,32 +40,25 @@ def generate_player_summary_df(player_id_list):
         team_id = player_summary.TEAM_ID.iloc[0]
         team_name = player_summary.TEAM_NAME.iloc[0]
         d_league_flag = player_summary.DLEAGUE_FLAG.iloc[0]
-        temp_dict = {'player_id': str(int(id)), 'first_name':first_name,
+
+        temp_dict = {'player_id': str(id), 'first_name':first_name,
                     'last_name':last_name,'display_name':display_name,
                     'age':int(age), 'season_exp':int(seasons),'position':position,
                     'roster_status':roster_status,'team_id':str(team_id),
                     'team_name':team_name,'dleague_flag':d_league_flag}
-        player_summary_df = player_summary_df.append(temp_dict, ignore_index = True)
+
+        lst_of_dicts.append(temp_dict)
         time.sleep(1)
+
+    player_summary_df = pd.DataFrame(lst_of_dicts)
+    player_summary_df.set_index('player_id',inplace = True, drop = True)
 
     return player_summary_df
 
 
 def generate_player_shot_df(player_id_list,year):
-    #put this into another loop if we want an aggregation by year...
-    # seasons = ['2016-17', '2015-16', '2014-15']
+    lst_of_dicts = []
 
-    player_shot_df = pd.DataFrame(columns = ['player_id', 'total_attempt',
-                                              'total_made', 'attempt_2',
-                                              'made_2', 'attempt_3', 'made_3',
-                                              'attempt_drive_2', 'made_drive_2',
-                                              'attempt_at_rim_2', 'made_at_rim_2',
-                                              'attempt_cut_run_2','made_cut_run_2',
-                                              'attempt_off_dribble_2', 'made_off_dribble_2',
-                                              'attempt_jumper_2', 'made_jumper_2',
-                                              'attempt_off_dribble_3', 'made_off_dribble_3',
-                                              'attempt_jumper_3', 'made_jumper_3',
-                                              'attempt_post_2', 'made_post_2'])
     for id in player_id_list:
         #get the shotchart for player
         shot_type= shotchart.ShotChart(id, season = year).shot_chart()
@@ -242,7 +231,7 @@ def generate_player_shot_df(player_id_list,year):
 
 
 
-        temp_dict = {'player_id': str(int(id)),
+        temp_dict = {'player_id': str(id),
                     'total_attempt':float(total_attempt),'total_made':float(total_made),
                     'attempt_2':float(attempt_2),'made_2':float(made_2),
                     'attempt_3':float(attempt_3), 'made_3':float(made_3),
@@ -255,22 +244,25 @@ def generate_player_shot_df(player_id_list,year):
                     'attempt_jumper_3':float(attempt_jumper_3), 'made_jumper_3':float(made_jumper_3),
                     'attempt_post_2':float(attempt_post_2), 'made_post_2':float(made_post_2)
                     }
-
-        player_shot_df = player_shot_df.append(temp_dict, ignore_index = True)
+        lst_of_dicts.append(temp_dict)
         time.sleep(1)
 
+    player_shot_df = pd.DataFrame(lst_of_dicts)
+    player_shot_df.set_index('player_id',inplace = True, drop=True)
     return player_shot_df
 
 
-def genearate_catch_shoot_df(player_id_lst, year):
+def generate_catch_shoot_df(player_id_lst, year):
     lst_of_dicts = []
     for id in player_id_lst:
         shooting = player.PlayerShotTracking(id, season=year).general_shooting()
         catch_shoot = shooting.loc[shooting['SHOT_TYPE'] == 'Catch and Shoot']
         catch_shoot_freq = catch_shoot.get_value(0, 'FGA_FREQUENCY')
-        lst_of_dicts.append({'player_id':id, 'catch_shoot_freq':catch_shoot_freq})
+        lst_of_dicts.append({'player_id':str(id), 'catch_shoot_freq':catch_shoot_freq})
         time.sleep(1)
+
     catch_shoot_df = pd.DataFrame(lst_of_dicts)
+    catch_shoot_df.set_index('player_id',inplace = True, drop = True)
     return catch_shoot_df
 
 
@@ -293,13 +285,14 @@ def generate_overalls_df(player_id_lst, year):
         pfd = float(stats.PFD[stats.GROUP_VALUE == year])
         pf = float(stats.PF[stats.GROUP_VALUE == year])
 
-        lst_of_dicts.append({'player_id':id,'gp':gp,'min_game':min_game,
+        lst_of_dicts.append({'player_id':str(id),'gp':gp,'min_game':min_game,
                               'ftm':ftm,'fta':fta,'oreb':oreb,'dreb':dreb,
                               'reb':reb,'ast':ast,'tov':tov,'stl':stl,'blk':blk,
                               'blk_a':blk_a,'pfd':pfd,'pf':pf})
         time.sleep(1)
 
     overalls_df = pd.DataFrame(lst_of_dicts)
+    overalls_df.set_index('player_id',inplace = True, drop = True)
     return overalls_df
 
 
@@ -312,20 +305,104 @@ def generate_rebounding_df(player_id_lst,year):
 
         lst_of_dicts.append({'player_id':id,'c_oreb_game':c_oreb_game,'c_dreb_game':c_dreb_game})
         time.sleep(1)
+
     rebounding_df = pd.DataFrame(lst_of_dicts)
+    rebounding_df.set_index('player_id',inplace = True, drop = True)
     return rebounding_df
+
+def generate_speed_dist_df(player_id_lst,year):
+
+    lst_of_dicts = []
+    league_speed_dist = league.PlayerSpeedDistanceTracking(season = year).overall()
+
+    for id in player_id_lst:
+        player_speed_dist = league_speed_dist[league_speed_dist.PLAYER_ID == id]
+        mi_game_tot = float(player_speed_dist.DIST_MILES)
+        mi_game_off = float(player_speed_dist.DIST_MILES_OFF)
+        mi_game_def = float(player_speed_dist.DIST_MILES_DEF)
+        avg_speed_tot = float(player_speed_dist.AVG_SPEED)
+        avg_speed_off = float(player_speed_dist.AVG_SPEED_OFF)
+        avg_speed_def = float(player_speed_dist.AVG_SPEED_DEF)
+
+        lst_of_dicts.append({'player_id':str(id),'mi_game_tot':mi_game_tot,
+                             'mi_game_off':mi_game_off,'mi_game_def':mi_game_def,
+                             'avg_speed_tot':avg_speed_tot,'avg_speed_off':avg_speed_off,
+                             'avg_speed_def':avg_speed_def})
+        time.sleep(1)
+
+    speed_dist_df = pd.DataFrame(lst_of_dicts)
+    speed_dist_df.set_index('player_id',inplace = True, drop = True)
+    return speed_dist_df
+
+
+def generate_defense_df(player_id_lst,year):
+
+    lst_of_dicts = []
+
+    for id in player_id_lst:
+        player_defense = player.PlayerDefenseTracking(id, season = year).overall()
+
+        d_fgm_overall = float(player_defense.D_FGM[player_defense.DEFENSE_CATEGORY == 'Overall'])
+        d_fga_overall = float(player_defense.D_FGA[player_defense.DEFENSE_CATEGORY == 'Overall'])
+        d_ppm_overall = float(player_defense.PCT_PLUSMINUS[player_defense.DEFENSE_CATEGORY == 'Overall'])
+
+        d_fgm_paint = float(player_defense.D_FGM[player_defense.DEFENSE_CATEGORY == 'Less Than 6 Ft'])
+        d_fga_paint = float(player_defense.D_FGA[player_defense.DEFENSE_CATEGORY == 'Less Than 6 Ft'])
+        d_ppm_paint = float(player_defense.PCT_PLUSMINUS[player_defense.DEFENSE_CATEGORY == 'Less Than 6 Ft'])
+
+        d_fgm_perim = float(player_defense.D_FGM[player_defense.DEFENSE_CATEGORY == 'Greater Than 15 Ft'])
+        d_fga_perim = float(player_defense.D_FGA[player_defense.DEFENSE_CATEGORY == 'Greater Than 15 Ft'])
+        d_ppm_perim = float(player_defense.PCT_PLUSMINUS[player_defense.DEFENSE_CATEGORY == 'Greater Than 15 Ft'])
+
+        lst_of_dicts.append({'player_id':str(id),
+                        'd_fgm_overall':d_fgm_overall,'d_fga_overall':d_fga_overall,'d_ppm_overall':d_ppm_overall,
+                        'd_fgm_paint':d_fgm_paint,'d_fga_paint':d_fga_paint,'d_ppm_paint':d_ppm_paint,
+                        'd_fgm_perim':d_fgm_perim,'d_fga_perim':d_fga_perim,'d_ppm_perim':d_ppm_perim
+                        })
+        time.sleep(1)
+
+    defense_df = pd.DataFrame(lst_of_dicts)
+    defense_df.set_index('player_id',inplace = True, drop = True)
+    return defense_df
+
+
+def generate_pass_df(player_id_lst, year):
+    lst_of_dicts = []
+
+    for id in player_id_lst:
+        player_pass = player.PlayerPassTracking(id, season = year).passes_made()
+        passes = (player_pass.PASS * player_pass.G)
+        pass_total = passes.sum()
+        lst_of_dicts.append({'player_id':str(id),'pass_total':float(pass_total)})
+        time.sleep(1)
+
+    pass_df = pd.DataFrame(lst_of_dicts)
+    pass_df.set_index('player_id',inplace = True, drop = True)
+    return pass_df
+
+
 
 
 
 if __name__ == '__main__':
     #create ordered list of player ids
     player_ids = get_player_ids()
+    player_ids_use = player_ids[:5]
+    year = '2015-16'
 
-    #clean and merge data...
-    summary_df = generate_player_summary_df(player_ids[:5])
-    shot_df = generate_player_shot_df(player_ids[:5],'2015-16')
-    catch_shoot_df = genearate_catch_shoot_df(player_ids[:5], '2015-16')
-    overalls_df = generate_overalls_df(player_ids[:5],'2015-16')
-    rebounding_df = generate_overalls_df(player_ids[:5],'2015-16')
+    #clean and munge
+    summary_df = generate_player_summary_df(player_ids_use)
+    shot_df = generate_player_shot_df(player_ids_use,year)
+    catch_shoot_df = generate_catch_shoot_df(player_ids_use, year)
+    overalls_df = generate_overalls_df(player_ids_use,year)
+    rebounding_df = generate_overalls_df(player_ids_use,year)
+    speed_dist_df = generate_speed_dist_df(player_ids_use, year)
+    defense_df = generate_defense_df(player_ids_use, year)
+    pass_df = generate_pass_df(player_ids_use, year)
+
+    #create master df
     merged_df = pd.concat([summary_df, shot_df, catch_shoot_df, overalls_df, \
-        rebounding_df], axis=1)
+        rebounding_df, speed_dist_df, defense_df, pass_df], axis=1)
+
+    #store df in csv
+    merged_df.to_csv('../data/aggregated_player_data.csv')
