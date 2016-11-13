@@ -55,7 +55,7 @@ def generate_player_summary_df(player_id_list):
     return player_summary_df
 
 
-def generate_player_shot_df(player_id_list):
+def generate_player_shot_df(player_id_list,year):
     #put this into another loop if we want an aggregation by year...
     # seasons = ['2016-17', '2015-16', '2014-15']
 
@@ -72,7 +72,7 @@ def generate_player_shot_df(player_id_list):
                                               'attempt_post_2', 'made_post_2'])
     for id in player_id_list:
         #get the shotchart for player
-        shot_type= shotchart.ShotChart(id, season = '2015-16').shot_chart()
+        shot_type= shotchart.ShotChart(id, season = year).shot_chart()
         shots = shot_type[['ACTION_TYPE','SHOT_TYPE','SHOT_ATTEMPTED_FLAG','SHOT_MADE_FLAG']] \
             .groupby(['ACTION_TYPE','SHOT_TYPE']).sum().reset_index()
         shots['SHOT_GRP'] = shots['SHOT_TYPE'] + '_' + shots['ACTION_TYPE']
@@ -261,12 +261,71 @@ def generate_player_shot_df(player_id_list):
 
     return player_shot_df
 
+
+def genearate_catch_shoot_df(player_id_lst, year):
+    lst_of_dicts = []
+    for id in player_id_lst:
+        shooting = player.PlayerShotTracking(id, season=year).general_shooting()
+        catch_shoot = shooting.loc[shooting['SHOT_TYPE'] == 'Catch and Shoot']
+        catch_shoot_freq = catch_shoot.get_value(0, 'FGA_FREQUENCY')
+        lst_of_dicts.append({'player_id':id, 'catch_shoot_freq':catch_shoot_freq})
+        time.sleep(1)
+    catch_shoot_df = pd.DataFrame(lst_of_dicts)
+    return catch_shoot_df
+
+
+def generate_overalls_df(player_id_lst, year):
+    lst_of_dicts = []
+    for id in player_id_lst:
+        stats = player.PlayerYearOverYearSplits(id).by_year()
+        gp = float(stats.GP[stats.GROUP_VALUE == year])
+        min_game = float(stats.MIN[stats.GROUP_VALUE == year])
+        ftm = float(stats.FTM[stats.GROUP_VALUE == year])
+        fta = float(stats.FTA[stats.GROUP_VALUE == year])
+        oreb = float(stats.OREB[stats.GROUP_VALUE == year])
+        dreb = float(stats.DREB[stats.GROUP_VALUE == year])
+        reb = float(stats.REB[stats.GROUP_VALUE == year])
+        ast = float(stats.AST[stats.GROUP_VALUE == year])
+        tov = float(stats.TOV[stats.GROUP_VALUE == year])
+        stl = float(stats.STL[stats.GROUP_VALUE == year])
+        blk = float(stats.BLK[stats.GROUP_VALUE == year])
+        blk_a = float(stats.BLKA[stats.GROUP_VALUE == year])
+        pfd = float(stats.PFD[stats.GROUP_VALUE == year])
+        pf = float(stats.PF[stats.GROUP_VALUE == year])
+
+        lst_of_dicts.append({'player_id':id,'gp':gp,'min_game':min_game,
+                              'ftm':ftm,'fta':fta,'oreb':oreb,'dreb':dreb,
+                              'reb':reb,'ast':ast,'tov':tov,'stl':stl,'blk':blk,
+                              'blk_a':blk_a,'pfd':pfd,'pf':pf})
+        time.sleep(1)
+
+    overalls_df = pd.DataFrame(lst_of_dicts)
+    return overalls_df
+
+
+def generate_rebounding_df(player_id_lst,year):
+    lst_of_dicts = []
+    for id in player_id_lst:
+        rebounding = player.PlayerReboundTracking(id, season=year).num_contested_rebounding()
+        c_oreb_game = float(rebounding.C_OREB.sum())
+        c_dreb_game = float(rebounding.C_DREB.sum())
+
+        lst_of_dicts.append({'player_id':id,'c_oreb_game':c_oreb_game,'c_dreb_game':c_dreb_game})
+        time.sleep(1)
+    rebounding_df = pd.DataFrame(lst_of_dicts)
+    return rebounding_df
+
+
+
 if __name__ == '__main__':
     #create ordered list of player ids
     player_ids = get_player_ids()
 
     #clean and merge data...
     summary_df = generate_player_summary_df(player_ids[:5])
-    shot_df = generate_player_shot_df(player_ids[:5])
-    
-    merged_df = pd.concat([summary_df, shot_df], axis=1)
+    shot_df = generate_player_shot_df(player_ids[:5],'2015-16')
+    catch_shoot_df = genearate_catch_shoot_df(player_ids[:5], '2015-16')
+    overalls_df = generate_overalls_df(player_ids[:5],'2015-16')
+    rebounding_df = generate_overalls_df(player_ids[:5],'2015-16')
+    merged_df = pd.concat([summary_df, shot_df, catch_shoot_df, overalls_df, \
+        rebounding_df], axis=1)

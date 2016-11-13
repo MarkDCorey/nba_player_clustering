@@ -5,8 +5,6 @@ from datetime import datetime
 import time
 from scrape import get_player_ids
 
-#get list of ids to iterate over
-player_ids = get_player_ids()
 
 
 #want to get sufficient data but also maintain recency relevance of data
@@ -31,14 +29,64 @@ seasons = ['2016-17', '2015-16', '2014-15']
 # # unique_shots = set(lst2)
 #
 
-# def genearate_catch_shoot_df(player_id_lst):
+
+player_ids = get_player_ids()
+
+# def generate_overalls_df(player_id_lst, year):
 #     lst_of_dicts = []
 #     for id in player_id_lst:
-#         shooting = player.PlayerShotTracking(id, season='2015-16').general_shooting()
-#         catch_shoot = shooting.loc[shooting['SHOT_TYPE'] == 'Catch and Shoot']
-#     #     catch_shoot_freq = catch_shoot['FGA_FREQUENCY']
-#     #     lst_of_dicts.append({'player_id':id, 'catch_shoot_freq':catch_shoot_freq})
-#     # catch_shoot_df = pd.DataFrame(lst_of_dicts)
-#     # return catch_shoot_df
+#         stats = player.PlayerYearOverYearSplits(id).by_year()
+#         gp = float(stats.GP[stats.GROUP_VALUE == year])
+#         min_game = float(stats.MIN[stats.GROUP_VALUE == year])
+#         ftm = float(stats.FTM[stats.GROUP_VALUE == year])
+#         fta = float(stats.FTA[stats.GROUP_VALUE == year])
+#         oreb = float(stats.OREB[stats.GROUP_VALUE == year])
+#         dreb = float(stats.DREB[stats.GROUP_VALUE == year])
+#         reb = float(stats.REB[stats.GROUP_VALUE == year])
+#         ast = float(stats.AST[stats.GROUP_VALUE == year])
+#         tov = float(stats.TOV[stats.GROUP_VALUE == year])
+#         stl = float(stats.STL[stats.GROUP_VALUE == year])
+#         blk = float(stats.BLK[stats.GROUP_VALUE == year])
+#         blk_a = float(stats.BLKA[stats.GROUP_VALUE == year])
+#         pfd = float(stats.PFD[stats.GROUP_VALUE == year])
+#         pf = float(stats.PF[stats.GROUP_VALUE == year])
 #
-# genearate_catch_shoot_df(player_ids[:10])
+#         lst_of_dicts.append({'player_id':id,'gp':gp,'min_game':min_game,
+#                               'ftm':ftm,'fta':fta,'oreb':oreb,'dreb':dreb,
+#                               'reb':reb,'ast':ast,'tov':tov,'stl':stl,'blk':blk,
+#                               'blk_a':blk_a,'pfd':pfd,'pf':pf})
+#         time.sleep(1)
+#
+#     overalls_df = pd.DataFrame(lst_of_dicts)
+#     return overalls_df
+#
+# test = generate_overalls_df(player_ids[:5], '2015-16')
+
+
+
+def generate_rebounding_df(player_id_lst,year):
+    lst_of_dicts = []
+    for id in player_id_lst:
+        rebounding = player.PlayerReboundTracking(id, season=year).num_contested_rebounding()
+        c_oreb_game = float(rebounding.C_OREB.sum())
+        c_dreb_game = float(rebounding.C_DREB.sum())
+
+        lst_of_dicts.append({'player_id':id,'c_oreb_game':c_oreb_game,'c_dreb_game':c_dreb_game})
+        time.sleep(1)
+    rebounding_df = pd.DataFrame(lst_of_dicts)
+    return rebounding_df
+
+test = generate_rebounding_df(['201939'], '2015-16')
+
+
+
+
+
+
+
+
+
+#
+# if __name__ == '__main__':
+#     #create ordered list of player ids
+#
