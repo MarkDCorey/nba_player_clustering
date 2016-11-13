@@ -303,7 +303,7 @@ def generate_rebounding_df(player_id_lst,year):
         c_oreb_game = float(rebounding.C_OREB.sum())
         c_dreb_game = float(rebounding.C_DREB.sum())
 
-        lst_of_dicts.append({'player_id':id,'c_oreb_game':c_oreb_game,'c_dreb_game':c_dreb_game})
+        lst_of_dicts.append({'player_id':str(id),'c_oreb_game':c_oreb_game,'c_dreb_game':c_dreb_game})
         time.sleep(1)
 
     rebounding_df = pd.DataFrame(lst_of_dicts)
@@ -395,7 +395,7 @@ if __name__ == '__main__':
     shot_df = generate_player_shot_df(player_ids_use,year)
     catch_shoot_df = generate_catch_shoot_df(player_ids_use, year)
     overalls_df = generate_overalls_df(player_ids_use,year)
-    rebounding_df = generate_overalls_df(player_ids_use,year)
+    rebounding_df = generate_rebounding_df(player_ids_use,year)
     speed_dist_df = generate_speed_dist_df(player_ids_use, year)
     defense_df = generate_defense_df(player_ids_use, year)
     pass_df = generate_pass_df(player_ids_use, year)
@@ -405,4 +405,4 @@ if __name__ == '__main__':
         rebounding_df, speed_dist_df, defense_df, pass_df], axis=1)
 
     #store df in csv
-    merged_df.to_csv('../data/aggregated_player_data.csv')
+    merged_df.to_csv('~/capstone_project/data/aggregated_player_data.csv')
