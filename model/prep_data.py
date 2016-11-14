@@ -92,7 +92,6 @@ pass_total
 #read in data to df
 player_data = pd.read_csv('~/capstone_project/data/aggregated_player_data.csv')
 
-
 #reduce the df
 include = ['player_id','age','season_exp','catch_shoot_freq','attempt_at_rim_2',
 'attempt_cut_run_2','attempt_drive_2','attempt_jumper_2','attempt_jumper_3',
@@ -128,23 +127,23 @@ player_data_rd['made_off_dribble_2_min'] = player_data_rd['made_off_dribble_2']/
 player_data_rd['made_off_dribble_3_min'] = player_data_rd['made_off_dribble_3']/player_data_rd['min_tot']
 player_data_rd['made_post_2_min'] = player_data_rd['made_post_2']/player_data_rd['min_tot']
 
-ast_min = (ast*gp)/min_tot
-blk_min = (blk*gp)/min_tot
-blk_a_min = (blk_a*gp)/min_tot
-dreb_min = (dreb*gp)/min_tot
-oreb_min = (oreb*gp)/min_tot
-fta_min = (fta*gp)/min_tot
-ftm_min = (ftm*gp)/min_tot
-stl_min = (ftl*gp)/min_tot
-tov_min = (tov*gp)/min_tot
-c_dreb_min = (c_dreb_game*gp)/min_tot
-c_dreb_min = (c_oreb_game*gp)/min_tot
-d_fga_paint_min = (d_fga_paint*gp)/min_tot
-d_fga_perim_min = (d_fga_perim*gp)/min_tot
-d_fgm_paint_min = (d_fgm_paint*gp)/min_tot
-d_fgm_perim_min = (d_fgm_perim*gp)/min_tot
-mi_def_min = (mi_game_def*gp)/min_tot
-mi_def_min = (mi_game_off*gp)/min_tot
+player_data_rd['ast_min'] = (player_data_rd['ast']*player_data_rd['gp'])/player_data_rd['min_tot']
+player_data_rd['blk_min'] = (player_data_rd['blk']*player_data_rd['gp'])/player_data_rd['min_tot']
+player_data_rd['blk_a_min'] = (player_data_rd['blk_a']*player_data_rd['gp'])/player_data_rd['min_tot']
+player_data_rd['reb_min'] = (player_data_rd['reb']*player_data_rd['gp'])/player_data_rd['min_tot']
+player_data_rd['oreb_min'] = (player_data_rd['oreb']*player_data_rd['gp'])/player_data_rd['min_tot']
+player_data_rd['fta_min'] = (player_data_rd['fta']*player_data_rd['gp'])/player_data_rd['min_tot']
+player_data_rd['ftm_min'] = (player_data_rd['ftm']*player_data_rd['gp'])/player_data_rd['min_tot']
+player_data_rd['stl_min'] = (player_data_rd['ftl']*player_data_rd['gp'])/player_data_rd['min_tot']
+player_data_rd['tov_min'] = (player_data_rd['tov']*player_data_rd['gp'])/player_data_rd['min_tot']
+player_data_rd['c_dreb_min'] = (player_data_rd['c_dreb_game']*player_data_rd['gp'])/player_data_rd['min_tot']
+player_data_rd['c_dreb_min'] = (player_data_rd['c_oreb_game']*player_data_rd['gp'])/player_data_rd['min_tot']
+player_data_rd['d_fga_paint_min'] = (player_data_rd['d_fga_paint']*player_data_rd['gp'])/player_data_rd['min_tot']
+player_data_rd['d_fga_perim_min'] = (player_data_rd['d_fga_perim']*player_data_rd['gp'])/player_data_rd['min_tot']
+player_data_rd['d_fgm_paint_min'] = (player_data_rd['d_fgm_paint']*player_data_rd['gp'])/player_data_rd['min_tot']
+player_data_rd['d_fgm_perim_min'] = (player_data_rd['d_fgm_perim']*player_data_rd['gp'])/player_data_rd['min_tot']
+player_data_rd['mi_def_min'] = (player['mi_game_def']*player_data_rd['gp'])/player_data_rd['min_tot']
+player_data_rd['mi_def_min'] = (player_data_rd['mi_game_off']*player['gp'])/player_data_rd['min_tot']
 
 
 #...and drop these
@@ -156,8 +155,5 @@ drp = ['attempt_at_rim_2','attempt_cut_run_2','attempt_drive_2','attempt_jumper_
 'd_fgm_paint','d_fgm_perim','mi_game_def','mi_game_off']
 
 
-
-
-if __name__ == '__main__':
-    #read in the aggregated/saved data into a df
-    player_data = pd.read_csv('~/capstone_project/data/aggregated_player_data.csv')
+player_data_rd.drop(drp, inplace = True)
+player_data.to_csv('~/capstone_project/data/featurized_data.csv')
