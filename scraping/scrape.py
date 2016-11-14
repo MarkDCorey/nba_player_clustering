@@ -286,12 +286,12 @@ def generate_catch_shoot_df(player_id_lst, year):
     for id in player_id_lst:
         shooting = player.PlayerShotTracking(id, season=year).general_shooting()
         if not shooting.empty:
-            catch_shoot = shooting.loc[shooting['SHOT_TYPE'] == 'Catch and Shoot']
-            catch_shoot_freq = catch_shoot.get_value(0, 'FGA_FREQUENCY')
+            catch_shoot_freq = float(shooting.FGA_FREQUENCY[shooting.SHOT_TYPE == 'Catch and Shoot'])
             lst_of_dicts.append({'player_id':str(id), 'catch_shoot_freq':catch_shoot_freq})
             time.sleep(1)
         else:
             lst_of_dicts.append({'player_id':str(id), 'catch_shoot_freq':0})
+            time.sleep(1)
 
     catch_shoot_df = pd.DataFrame(lst_of_dicts)
     catch_shoot_df.set_index('player_id',inplace = True, drop = True)

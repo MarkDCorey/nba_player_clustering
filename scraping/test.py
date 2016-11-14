@@ -54,13 +54,13 @@ def generate_pass_df(player_id_lst, year):
 ##### GET REACH DATA
 ### REGRESSION ANALYSIS - eg attributes like height and reach on rebounding
 
+
 def generate_catch_shoot_df(player_id_lst, year):
     lst_of_dicts = []
     for id in player_id_lst:
         shooting = player.PlayerShotTracking(id, season=year).general_shooting()
         if not shooting.empty:
-            catch_shoot = shooting.loc[shooting['SHOT_TYPE'] == 'Catch and Shoot']
-            catch_shoot_freq = catch_shoot.get_value(0, 'FGA_FREQUENCY')
+            catch_shoot_freq = float(shooting.FGA_FREQUENCY[shooting.SHOT_TYPE == 'Catch and Shoot'])
             lst_of_dicts.append({'player_id':str(id), 'catch_shoot_freq':catch_shoot_freq})
             time.sleep(1)
         else:
