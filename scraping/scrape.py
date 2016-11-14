@@ -285,10 +285,13 @@ def generate_catch_shoot_df(player_id_lst, year):
     lst_of_dicts = []
     for id in player_id_lst:
         shooting = player.PlayerShotTracking(id, season=year).general_shooting()
-        catch_shoot = shooting.loc[shooting['SHOT_TYPE'] == 'Catch and Shoot']
-        catch_shoot_freq = catch_shoot.get_value(0, 'FGA_FREQUENCY')
-        lst_of_dicts.append({'player_id':str(id), 'catch_shoot_freq':catch_shoot_freq})
-        time.sleep(1)
+        if not shooting.empty:
+            catch_shoot = shooting.loc[shooting['SHOT_TYPE'] == 'Catch and Shoot']
+            catch_shoot_freq = catch_shoot.get_value(0, 'FGA_FREQUENCY')
+            lst_of_dicts.append({'player_id':str(id), 'catch_shoot_freq':catch_shoot_freq})
+            time.sleep(1)
+        else:
+            lst_of_dicts.append({'player_id':str(id), 'catch_shoot_freq':0})
 
     catch_shoot_df = pd.DataFrame(lst_of_dicts)
     catch_shoot_df.set_index('player_id',inplace = True, drop = True)
@@ -299,26 +302,35 @@ def generate_overalls_df(player_id_lst, year):
     lst_of_dicts = []
     for id in player_id_lst:
         stats = player.PlayerYearOverYearSplits(id).by_year()
-        gp = float(stats.GP[stats.GROUP_VALUE == year])
-        min_game = float(stats.MIN[stats.GROUP_VALUE == year])
-        ftm = float(stats.FTM[stats.GROUP_VALUE == year])
-        fta = float(stats.FTA[stats.GROUP_VALUE == year])
-        oreb = float(stats.OREB[stats.GROUP_VALUE == year])
-        dreb = float(stats.DREB[stats.GROUP_VALUE == year])
-        reb = float(stats.REB[stats.GROUP_VALUE == year])
-        ast = float(stats.AST[stats.GROUP_VALUE == year])
-        tov = float(stats.TOV[stats.GROUP_VALUE == year])
-        stl = float(stats.STL[stats.GROUP_VALUE == year])
-        blk = float(stats.BLK[stats.GROUP_VALUE == year])
-        blk_a = float(stats.BLKA[stats.GROUP_VALUE == year])
-        pfd = float(stats.PFD[stats.GROUP_VALUE == year])
-        pf = float(stats.PF[stats.GROUP_VALUE == year])
+        stats = stats[stats.GROUP_VALUE == year]
+        if not stats.empty:
+            gp = float(stats.GP)
+            min_game = float(stats.MIN)
+            ftm = float(stats.FTM)
+            fta = float(stats.FTA)
+            oreb = float(stats.OREB)
+            dreb = float(stats.DREB)
+            reb = float(stats.REB)
+            ast = float(stats.AST)
+            tov = float(stats.TOV)
+            stl = float(stats.STL)
+            blk = float(stats.BLK)
+            blk_a = float(stats.BLKA)
+            pfd = float(stats.PFD)
+            pf = float(stats.PF)
 
-        lst_of_dicts.append({'player_id':str(id),'gp':gp,'min_game':min_game,
+            lst_of_dicts.append({'player_id':str(id),'gp':gp,'min_game':min_game,
                               'ftm':ftm,'fta':fta,'oreb':oreb,'dreb':dreb,
                               'reb':reb,'ast':ast,'tov':tov,'stl':stl,'blk':blk,
                               'blk_a':blk_a,'pfd':pfd,'pf':pf})
-        time.sleep(1)
+            time.sleep(1)
+
+        else:
+            lst_of_dicts.append({'player_id':str(id),'gp':0,'min_game':0,
+                              'ftm':0,'fta':0,'oreb':0,'dreb':0,
+                              'reb':0,'ast':0,'tov':0,'stl':0,'blk':0,
+                              'blk_a':0,'pfd':0,'pf':0})
+            time.sleep(1)
 
     overalls_df = pd.DataFrame(lst_of_dicts)
     overalls_df.set_index('player_id',inplace = True, drop = True)
@@ -329,11 +341,15 @@ def generate_rebounding_df(player_id_lst,year):
     lst_of_dicts = []
     for id in player_id_lst:
         rebounding = player.PlayerReboundTracking(id, season=year).num_contested_rebounding()
-        c_oreb_game = float(rebounding.C_OREB.sum())
-        c_dreb_game = float(rebounding.C_DREB.sum())
+        if not rebounding.empty:
+            c_oreb_game = float(rebounding.C_OREB.sum())
+            c_dreb_game = float(rebounding.C_DREB.sum())
 
-        lst_of_dicts.append({'player_id':str(id),'c_oreb_game':c_oreb_game,'c_dreb_game':c_dreb_game})
-        time.sleep(1)
+            lst_of_dicts.append({'player_id':str(id),'c_oreb_game':c_oreb_game,'c_dreb_game':c_dreb_game})
+            time.sleep(1)
+
+        else:
+            lst_of_dicts.append({'player_id':str(id),'c_oreb_game':0,'c_dreb_game':0})
 
     rebounding_df = pd.DataFrame(lst_of_dicts)
     rebounding_df.set_index('player_id',inplace = True, drop = True)
@@ -345,19 +361,27 @@ def generate_speed_dist_df(player_id_lst,year):
     league_speed_dist = league.PlayerSpeedDistanceTracking(season = year).overall()
 
     for id in player_id_lst:
-        player_speed_dist = league_speed_dist[league_speed_dist.PLAYER_ID == id]
-        mi_game_tot = float(player_speed_dist.DIST_MILES)
-        mi_game_off = float(player_speed_dist.DIST_MILES_OFF)
-        mi_game_def = float(player_speed_dist.DIST_MILES_DEF)
-        avg_speed_tot = float(player_speed_dist.AVG_SPEED)
-        avg_speed_off = float(player_speed_dist.AVG_SPEED_OFF)
-        avg_speed_def = float(player_speed_dist.AVG_SPEED_DEF)
+        player_speed_dist = league_speed_dist[league_speed_dist.PLAYER_ID == int(id)]
+        if not player_speed_dist.empty:
+            mi_game_tot = float(player_speed_dist.DIST_MILES)
+            mi_game_off = float(player_speed_dist.DIST_MILES_OFF)
+            mi_game_def = float(player_speed_dist.DIST_MILES_DEF)
+            avg_speed_tot = float(player_speed_dist.AVG_SPEED)
+            avg_speed_off = float(player_speed_dist.AVG_SPEED_OFF)
+            avg_speed_def = float(player_speed_dist.AVG_SPEED_DEF)
 
-        lst_of_dicts.append({'player_id':str(id),'mi_game_tot':mi_game_tot,
+            lst_of_dicts.append({'player_id':str(id),'mi_game_tot':mi_game_tot,
                              'mi_game_off':mi_game_off,'mi_game_def':mi_game_def,
                              'avg_speed_tot':avg_speed_tot,'avg_speed_off':avg_speed_off,
                              'avg_speed_def':avg_speed_def})
-        time.sleep(1)
+            time.sleep(1)
+
+        else:
+            lst_of_dicts.append({'player_id':str(id),'mi_game_tot':0,
+                             'mi_game_off':0,'mi_game_def':0,
+                             'avg_speed_tot':0,'avg_speed_off':0,
+                             'avg_speed_def':0})
+            time.sleep(1)
 
     speed_dist_df = pd.DataFrame(lst_of_dicts)
     speed_dist_df.set_index('player_id',inplace = True, drop = True)
@@ -370,25 +394,34 @@ def generate_defense_df(player_id_lst,year):
 
     for id in player_id_lst:
         player_defense = player.PlayerDefenseTracking(id, season = year).overall()
+        if not player_defense.empty:
 
-        d_fgm_overall = float(player_defense.D_FGM[player_defense.DEFENSE_CATEGORY == 'Overall'])
-        d_fga_overall = float(player_defense.D_FGA[player_defense.DEFENSE_CATEGORY == 'Overall'])
-        d_ppm_overall = float(player_defense.PCT_PLUSMINUS[player_defense.DEFENSE_CATEGORY == 'Overall'])
+            d_fgm_overall = float(player_defense.D_FGM[player_defense.DEFENSE_CATEGORY == 'Overall'])
+            d_fga_overall = float(player_defense.D_FGA[player_defense.DEFENSE_CATEGORY == 'Overall'])
+            d_ppm_overall = float(player_defense.PCT_PLUSMINUS[player_defense.DEFENSE_CATEGORY == 'Overall'])
 
-        d_fgm_paint = float(player_defense.D_FGM[player_defense.DEFENSE_CATEGORY == 'Less Than 6 Ft'])
-        d_fga_paint = float(player_defense.D_FGA[player_defense.DEFENSE_CATEGORY == 'Less Than 6 Ft'])
-        d_ppm_paint = float(player_defense.PCT_PLUSMINUS[player_defense.DEFENSE_CATEGORY == 'Less Than 6 Ft'])
+            d_fgm_paint = float(player_defense.D_FGM[player_defense.DEFENSE_CATEGORY == 'Less Than 6 Ft'])
+            d_fga_paint = float(player_defense.D_FGA[player_defense.DEFENSE_CATEGORY == 'Less Than 6 Ft'])
+            d_ppm_paint = float(player_defense.PCT_PLUSMINUS[player_defense.DEFENSE_CATEGORY == 'Less Than 6 Ft'])
 
-        d_fgm_perim = float(player_defense.D_FGM[player_defense.DEFENSE_CATEGORY == 'Greater Than 15 Ft'])
-        d_fga_perim = float(player_defense.D_FGA[player_defense.DEFENSE_CATEGORY == 'Greater Than 15 Ft'])
-        d_ppm_perim = float(player_defense.PCT_PLUSMINUS[player_defense.DEFENSE_CATEGORY == 'Greater Than 15 Ft'])
+            d_fgm_perim = float(player_defense.D_FGM[player_defense.DEFENSE_CATEGORY == 'Greater Than 15 Ft'])
+            d_fga_perim = float(player_defense.D_FGA[player_defense.DEFENSE_CATEGORY == 'Greater Than 15 Ft'])
+            d_ppm_perim = float(player_defense.PCT_PLUSMINUS[player_defense.DEFENSE_CATEGORY == 'Greater Than 15 Ft'])
 
-        lst_of_dicts.append({'player_id':str(id),
+            lst_of_dicts.append({'player_id':str(id),
                         'd_fgm_overall':d_fgm_overall,'d_fga_overall':d_fga_overall,'d_ppm_overall':d_ppm_overall,
                         'd_fgm_paint':d_fgm_paint,'d_fga_paint':d_fga_paint,'d_ppm_paint':d_ppm_paint,
                         'd_fgm_perim':d_fgm_perim,'d_fga_perim':d_fga_perim,'d_ppm_perim':d_ppm_perim
                         })
-        time.sleep(1)
+            time.sleep(1)
+
+        else:
+            lst_of_dicts.append({'player_id':str(id),
+                        'd_fgm_overall':0,'d_fga_overall':0,'d_ppm_overall':0,
+                        'd_fgm_paint':0,'d_fga_paint':0,'d_ppm_paint':0,
+                        'd_fgm_perim':0,'d_fga_perim':0,'d_ppm_perim':0
+                        })
+
 
     defense_df = pd.DataFrame(lst_of_dicts)
     defense_df.set_index('player_id',inplace = True, drop = True)
@@ -400,10 +433,14 @@ def generate_pass_df(player_id_lst, year):
 
     for id in player_id_lst:
         player_pass = player.PlayerPassTracking(id, season = year).passes_made()
-        passes = (player_pass.PASS * player_pass.G)
-        pass_total = passes.sum()
-        lst_of_dicts.append({'player_id':str(id),'pass_total':float(pass_total)})
-        time.sleep(1)
+        if not player_pass.empty:
+            passes = (player_pass.PASS * player_pass.G)
+            pass_total = passes.sum()
+            lst_of_dicts.append({'player_id':str(id),'pass_total':float(pass_total)})
+            time.sleep(1)
+
+        else:
+            lst_of_dicts.append({'player_id':str(id),'pass_total':0})
 
     pass_df = pd.DataFrame(lst_of_dicts)
     pass_df.set_index('player_id',inplace = True, drop = True)
@@ -417,7 +454,7 @@ if __name__ == '__main__':
     #create ordered list of player ids
     year = '2015-16'
     player_ids = get_player_ids(year = year)
-    # player_ids = player_ids[:2]
+    # player_ids = player_ids[:3]
 
     #clean and munge
     summary_df = generate_player_summary_df(player_ids)
