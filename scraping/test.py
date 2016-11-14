@@ -54,25 +54,46 @@ def generate_pass_df(player_id_lst, year):
 ##### GET REACH DATA
 ### REGRESSION ANALYSIS - eg attributes like height and reach on rebounding
 
+def get_player_ids(year = '2016-17', only_curr = 0):
+    players = player.PlayerList(season = year, only_current = only_curr ).info()
 
-def generate_catch_shoot_df(player_id_lst, year):
+    year_start = int(year[0:4])
+    year_end = int('20'+year[-2:])
+
+    players.FROM_YEAR = pd.to_numeric(players.FROM_YEAR)
+    players.TO_YEAR = pd.to_numeric(players.TO_YEAR)
+
+    player_ids = []
+    for i in range(players.shape[0]):
+        if (players.FROM_YEAR.iloc[i] <= year_end) and (players.TO_YEAR.iloc[i] >= year_end):
+            player_ids.append(players.PERSON_ID.iloc[i])
+    player_ids.sort()
+    return player_ids
+
+
+
+def generate_rebounding_df(player_id_lst,year):
     lst_of_dicts = []
     for id in player_id_lst:
-        shooting = player.PlayerShotTracking(id, season=year).general_shooting()
-        if not shooting.empty:
-            catch_shoot_freq = float(shooting.FGA_FREQUENCY[shooting.SHOT_TYPE == 'Catch and Shoot'])
-            lst_of_dicts.append({'player_id':str(id), 'catch_shoot_freq':catch_shoot_freq})
+        rebounding = player.PlayerReboundTracking(id, season=year).num_contested_rebounding()
+        if not rebounding.empty:
+            c_oreb_game = float(rebounding.C_OREB.sum())
+            c_dreb_game = float(rebounding.C_DREB.sum())
+
+            lst_of_dicts.append({'player_id':str(id),'c_oreb_game':c_oreb_game,'c_dreb_game':c_dreb_game})
             time.sleep(1)
+
         else:
-            lst_of_dicts.append({'player_id':str(id), 'catch_shoot_freq':0})
+            lst_of_dicts.append({'player_id':str(id),'c_oreb_game':0,'c_dreb_game':0})
 
-    catch_shoot_df = pd.DataFrame(lst_of_dicts)
-    catch_shoot_df.set_index('player_id',inplace = True, drop = True)
-    return catch_shoot_df
+    rebounding_df = pd.DataFrame(lst_of_dicts)
+    rebounding_df.set_index('player_id',inplace = True, drop = True)
+    return rebounding_df
 
+player_ids = get_player_ids('2015-16')
+test = generate_rebounding_df(player_ids,'2015-16')
 
-test = generate_catch_shoot_df(['201935','101249'],'2015-16')
-#101249
+# ['201935','101249','201593']
 
 #
 # if __name__ == '__main__':
