@@ -108,7 +108,7 @@ include = ['player_id','display_name','age','height','weight','season_exp','catc
 'd_fgm_paint','d_fgm_perim','d_ppm_paint','d_ppm_perim','pass_total']
 
 
-player_data_red = player_data[include]
+player_data_rd = player_data[include]
 
 #add 'min_tot' to new df
 player_data_rd['min_tot'] = player_data_rd['gp'] * player_data_rd['min_game']
@@ -138,7 +138,7 @@ player_data_rd['reb_min'] = (player_data_rd['reb']*player_data_rd['gp'])/player_
 player_data_rd['oreb_min'] = (player_data_rd['oreb']*player_data_rd['gp'])/player_data_rd['min_tot']
 player_data_rd['fta_min'] = (player_data_rd['fta']*player_data_rd['gp'])/player_data_rd['min_tot']
 player_data_rd['ftm_min'] = (player_data_rd['ftm']*player_data_rd['gp'])/player_data_rd['min_tot']
-player_data_rd['stl_min'] = (player_data_rd['ftl']*player_data_rd['gp'])/player_data_rd['min_tot']
+player_data_rd['stl_min'] = (player_data_rd['stl']*player_data_rd['gp'])/player_data_rd['min_tot']
 player_data_rd['tov_min'] = (player_data_rd['tov']*player_data_rd['gp'])/player_data_rd['min_tot']
 
 player_data_rd['c_dreb_min'] = (player_data_rd['c_dreb_game']*player_data_rd['gp'])/player_data_rd['min_tot']
@@ -149,24 +149,47 @@ player_data_rd['d_fga_perim_min'] = (player_data_rd['d_fga_perim']*player_data_r
 player_data_rd['d_fgm_paint_min'] = (player_data_rd['d_fgm_paint']*player_data_rd['gp'])/player_data_rd['min_tot']
 player_data_rd['d_fgm_perim_min'] = (player_data_rd['d_fgm_perim']*player_data_rd['gp'])/player_data_rd['min_tot']
 
-player_data_rd['mi_def_min'] = (player['mi_game_def']*player_data_rd['gp'])/player_data_rd['min_tot']
-player_data_rd['mi_def_min'] = (player_data_rd['mi_game_off']*player['gp'])/player_data_rd['min_tot']
+player_data_rd['mi_def_min'] = (player_data_rd['mi_game_def']*player_data_rd['gp'])/player_data_rd['min_tot']
+player_data_rd['mi_def_min'] = (player_data_rd['mi_game_off']*player_data_rd['gp'])/player_data_rd['min_tot']
 
 player_data_rd['pass_min']= player_data_rd['pass_total']/player_data_rd['min_tot']
 
 
+#add min/game, drop min_tot
+
+
+
+
+
 #...and drop these
-drp = ['attempt_at_rim_2','attempt_cut_run_2','attempt_drive_2','attempt_jumper_2',
-'attempt_jumper_3','attempt_off_dribble_2','attempt_off_dribble_3','attempt_post_2',
-'made_at_rim_2','made_cut_run_2','made_drive_2','made_jumper_2','made_jumper_3',
-'made_off_dribble_2','made_off_dribble_3','made_post_2','ast','blk','dreb','oreb',
-'fta','ftm','stl','tov','c_dreb_game','c_oreb_game','d_fga_paint','d_fga_perim',
-'d_fgm_paint','d_fgm_perim','mi_game_def','mi_game_off','pass_total']
-
-
-#remember to check for null and 0 values
-    #some records are missing height and weight (0 as placeholder)
-
-
-player_data_rd.drop(drp, inplace = True)
-player_data_rd.to_csv('~/capstone_project/data/featurized_data.csv')
+# drp = ['attempt_at_rim_2','attempt_cut_run_2','attempt_drive_2','attempt_jumper_2',
+# 'attempt_jumper_3','attempt_off_dribble_2','attempt_off_dribble_3','attempt_post_2',
+# 'made_at_rim_2','made_cut_run_2','made_drive_2','made_jumper_2','made_jumper_3',
+# 'made_off_dribble_2','made_off_dribble_3','made_post_2','ast','blk','blk_a','dreb','oreb',
+# 'fta','ftm','stl','tov','c_dreb_game','c_oreb_game','d_fga_paint','d_fga_perim',
+# 'd_fgm_paint','d_fgm_perim','mi_game_def','mi_game_off','pass_total']
+#
+attempt_at_rim_2             454 non-null float64
+attempt_cut_run_2            454 non-null float64
+attempt_drive_2              454 non-null float64
+attempt_jumper_2             454 non-null float64
+attempt_jumper_3             454 non-null float64
+attempt_off_dribble_2        454 non-null float64
+attempt_off_dribble_3        454 non-null float64
+attempt_post_2               454 non-null float64
+made_at_rim_2                454 non-null float64
+made_cut_run_2               454 non-null float64
+made_drive_2                 454 non-null float64
+made_jumper_2                454 non-null float64
+made_jumper_3                454 non-null float64
+made_off_dribble_2           454 non-null float64
+made_off_dribble_3           454 non-null float64
+made_post_2                  454 non-null float64
+#
+#
+# #remember to check for null and 0 values
+#     #some records are missing height and weight (0 as placeholder)
+#
+#
+# player_data_rd.drop(drp, inplace = True)
+# player_data_rd.to_csv('~/capstone_project/data/featurized_data.csv')
