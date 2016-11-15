@@ -5,14 +5,14 @@ PROJECT DESCRIPTION
 Determine whether we can meaningfully cluster players NBA players by "type"
 
 
-Use this info to determine whether there are optimal compositions of player types when forming teams and lineups?  If there are optimal compositions, we can potentially....
+Use this info to determine whether there are optimal compositions of player types when forming teams and lineups.  If there are optimal compositions, we can potentially....
 
   -identify latent improvement opportunities for any team (eg new lineups to test,     prioritization of players to pursue via free-agency or trade).
-  
+
   -predict any player's value to any team.
-  
+
   -determine whether optimal team/lineup compositions have changed over time.
-  
+
   -determine whether new trends in team/lineup compositions are developing.
 
 
