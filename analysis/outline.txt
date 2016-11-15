@@ -1,0 +1,18 @@
+#CLUSTER INTERPRETABILITY
+-What features are most representative of each cluster?
+-What players?
+-present feature and player cloud (within cluster size/color variations)
+
+
+#TEAM DYNAMICS
+-overlay clusters on lineup data
+-aggregate pts_for and pts_against for cluster groupings
+-assign net-plus minus for each cluster grouping for ranking
+-run t-test on cluster groupings, calc confidence for each
+-present process, findings, and potential applications
+
+ #TEAM RECOMMENDER (example of application)
+ -biggest needs/areas for improvement for each team
+ -players ranked within cluster as most representative of that cluster
+ -unique player value to each team (eg cluster X player 
+    would boost performance by Y)
