@@ -37,6 +37,8 @@ if __name__ == '__main__':
     test_players = test[['player_id','display_name']]
     test.drop(['player_id','display_name'], inplace = True, axis = 1)
     test.fillna(0, inplace = True)
-    KMeans_test = KMeans(n_clusters=8, init='k-means++', n_init=10, max_iter=300, tol=0.0001, \
+    KMeans_test = KMeans(n_clusters=15, init='k-means++', n_init=10, max_iter=300, tol=0.0001, \
     precompute_distances='auto', verbose=0, random_state=None, copy_x=True, n_jobs=1, algorithm='auto')
     KMeans_test.fit(test)
+    test_labels = KMeans_test.labels_
+    test_players['cluster'] = test_labels
