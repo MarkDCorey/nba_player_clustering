@@ -11,11 +11,8 @@ from scipy.cluster.hierarchy import linkage, dendrogram
 # #
 # kmeans = KMeans()
 # kmeans.fit()
-#
-# #Need process to index/scale the data
-# def data_scaling(df):
-#     pass
-#
+# kmeans.labels_
+
 # #look for interpretability in the clusters.
 # #ideally there is significant separation (eg standard dev from average of player set) on a subset of features
 # #either use these features to define the cluster labels, or come up with own
@@ -32,4 +29,4 @@ from scipy.cluster.hierarchy import linkage, dendrogram
 
 if __name__ == '__main__':
     #read in the aggregated/saved data into a df
-    player_data = pd.read_csv('~/capstone_project/data/aggregated_player_data.csv')
+    featurized_data = pd.read_csv('~/capstone_project/data/featurized_data.csv')

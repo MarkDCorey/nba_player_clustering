@@ -72,49 +72,59 @@ def get_player_ids(year = '2016-17', only_curr = 0):
 
 
 
-def generate_defense_df(player_id_lst,year):
+def generate_player_summary_df(player_id_list):
 
     lst_of_dicts = []
 
-    for id in player_id_lst:
-        player_defense = player.PlayerDefenseTracking(id, season = year).overall()
-        if not player_defense.empty:
-
-            d_fgm_overall = float(player_defense.D_FGM[player_defense.DEFENSE_CATEGORY == 'Overall'])
-            d_fga_overall = float(player_defense.D_FGA[player_defense.DEFENSE_CATEGORY == 'Overall'])
-            d_ppm_overall = float(player_defense.PCT_PLUSMINUS[player_defense.DEFENSE_CATEGORY == 'Overall'])
-
-            d_fgm_paint = float(player_defense.D_FGM[player_defense.DEFENSE_CATEGORY == 'Less Than 6 Ft'])
-            d_fga_paint = float(player_defense.D_FGA[player_defense.DEFENSE_CATEGORY == 'Less Than 6 Ft'])
-            d_ppm_paint = float(player_defense.PCT_PLUSMINUS[player_defense.DEFENSE_CATEGORY == 'Less Than 6 Ft'])
-
-            d_fgm_perim = float(player_defense.D_FGM[player_defense.DEFENSE_CATEGORY == 'Greater Than 15 Ft'])
-            d_fga_perim = float(player_defense.D_FGA[player_defense.DEFENSE_CATEGORY == 'Greater Than 15 Ft'])
-            d_ppm_perim = float(player_defense.PCT_PLUSMINUS[player_defense.DEFENSE_CATEGORY == 'Greater Than 15 Ft'])
-
-            lst_of_dicts.append({'player_id':str(id),
-                        'd_fgm_overall':d_fgm_overall,'d_fga_overall':d_fga_overall,'d_ppm_overall':d_ppm_overall,
-                        'd_fgm_paint':d_fgm_paint,'d_fga_paint':d_fga_paint,'d_ppm_paint':d_ppm_paint,
-                        'd_fgm_perim':d_fgm_perim,'d_fga_perim':d_fga_perim,'d_ppm_perim':d_ppm_perim
-                        })
-            time.sleep(1)
-
+    for id in player_id_list:
+        print id
+        player_summary = player.PlayerSummary(player_id = id).info()
+        first_name = player_summary.FIRST_NAME.iloc[0]
+        last_name = player_summary.LAST_NAME.iloc[0]
+        display_name = player_summary.DISPLAY_FIRST_LAST.iloc[0]
+        bday = player_summary.BIRTHDATE.iloc[0]
+        bday = datetime.strptime(bday, '%Y-%m-%dT%H:%M:%S')
+        age = (datetime.now() - bday).days
+        ht = str(player_summary.HEIGHT.iloc[0])
+        if ht:
+            height_ft = int(ht.rsplit('-', 1)[0]) * 12
+            if ht.rsplit('-',1)[1]:
+                height_in = int(ht.rsplit('-',1)[1])
+            else:
+                height_in = 0
+            height = height_ft + height_in
         else:
-            lst_of_dicts.append({'player_id':str(id),
-                        'd_fgm_overall':0,'d_fga_overall':0,'d_ppm_overall':0,
-                        'd_fgm_paint':0,'d_fga_paint':0,'d_ppm_paint':0,
-                        'd_fgm_perim':0,'d_fga_perim':0,'d_ppm_perim':0
-                        })
+            height = 0
+        wt = str(player_summary.WEIGHT.iloc[0])
+        if wt:
+            weight = int(wt)
+        else:
+            weight = 0
+        seasons = player_summary.SEASON_EXP.iloc[0]
+        position = player_summary.POSITION.iloc[0]
+        roster_status = player_summary.ROSTERSTATUS.iloc[0]
+        team_id = player_summary.TEAM_ID.iloc[0]
+        team_name = player_summary.TEAM_NAME.iloc[0]
+        d_league_flag = player_summary.DLEAGUE_FLAG.iloc[0]
 
+        temp_dict = {'player_id': str(id), 'first_name':first_name,
+                    'last_name':last_name,'display_name':display_name,
+                    'age':int(age),'height':height,'weight':weight,'season_exp':int(seasons),
+                    'position':position,'roster_status':roster_status,'team_id':str(team_id),
+                    'team_name':team_name,'dleague_flag':d_league_flag}
 
-    defense_df = pd.DataFrame(lst_of_dicts)
-    defense_df.set_index('player_id',inplace = True, drop = True)
-    return defense_df
+        lst_of_dicts.append(temp_dict)
+        time.sleep(1)
 
-player_ids = get_player_ids('2015-16')
-test = generate_defense_df(player_ids,'2015-16')
+    player_summary_df = pd.DataFrame(lst_of_dicts)
+    player_summary_df.set_index('player_id',inplace = True, drop = True)
 
-# ['201935','101249','201593']
+    return player_summary_df
+
+# player_ids = get_player_ids('2015-16')
+test = generate_player_summary_df(['201935','101249','201593','200770'])
+
+# ['201935','101249','201593,200770']
 
 #
 # if __name__ == '__main__':

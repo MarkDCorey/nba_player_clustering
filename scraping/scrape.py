@@ -37,6 +37,7 @@ def generate_player_summary_df(player_id_list):
     lst_of_dicts = []
 
     for id in player_id_list:
+        print id
         player_summary = player.PlayerSummary(player_id = id).info()
         first_name = player_summary.FIRST_NAME.iloc[0]
         last_name = player_summary.LAST_NAME.iloc[0]
@@ -44,6 +45,21 @@ def generate_player_summary_df(player_id_list):
         bday = player_summary.BIRTHDATE.iloc[0]
         bday = datetime.strptime(bday, '%Y-%m-%dT%H:%M:%S')
         age = (datetime.now() - bday).days
+        ht = str(player_summary.HEIGHT.iloc[0])
+        if ht:
+            height_ft = int(ht.rsplit('-', 1)[0]) * 12
+            if ht.rsplit('-',1)[1]:
+                height_in = int(ht.rsplit('-',1)[1])
+            else:
+                height_in = 0
+            height = height_ft + height_in
+        else:
+            height = 0
+        wt = str(player_summary.WEIGHT.iloc[0])
+        if wt:
+            weight = int(wt)
+        else:
+            weight = 0
         seasons = player_summary.SEASON_EXP.iloc[0]
         position = player_summary.POSITION.iloc[0]
         roster_status = player_summary.ROSTERSTATUS.iloc[0]
@@ -53,8 +69,8 @@ def generate_player_summary_df(player_id_list):
 
         temp_dict = {'player_id': str(id), 'first_name':first_name,
                     'last_name':last_name,'display_name':display_name,
-                    'age':int(age), 'season_exp':int(seasons),'position':position,
-                    'roster_status':roster_status,'team_id':str(team_id),
+                    'age':int(age),'height':height,'weight':weight,'season_exp':int(seasons),
+                    'position':position,'roster_status':roster_status,'team_id':str(team_id),
                     'team_name':team_name,'dleague_flag':d_league_flag}
 
         lst_of_dicts.append(temp_dict)
