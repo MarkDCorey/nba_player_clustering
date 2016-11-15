@@ -2,6 +2,7 @@ import os
 import numpy as np
 import pandas as pd
 from sklearn.cluster import KMeans
+from sklearn.preprocessing import scale
 from collections import Counter
 from scipy.spatial.distance import pdist, squareform
 import matplotlib.pyplot as plt
@@ -36,10 +37,13 @@ if __name__ == '__main__':
     test = featurized_data[featurized_data.min_game >0]
     test_players = test[['player_id','display_name']]
     test.drop(['player_id','display_name'], inplace = True, axis = 1)
+    #,'age','height','weight','season_exp','min_game'
     test.fillna(0, inplace = True)
-    KMeans_test = KMeans(n_clusters=15, init='k-means++', n_init=10, max_iter=300, tol=0.0001, \
+    test = scale(test)
+    KMeans_test = KMeans(n_clusters=25, init='k-means++', n_init=10, max_iter=300, tol=0.0001, \
     precompute_distances='auto', verbose=0, random_state=None, copy_x=True, n_jobs=1, algorithm='auto')
     KMeans_test.fit(test)
     test_labels = KMeans_test.labels_
     test_players['cluster'] = test_labels
     test_players.to_csv('~/capstone_project/data/cluster_test.csv')
+    # test_players[test_players['cluster'] == 10]
