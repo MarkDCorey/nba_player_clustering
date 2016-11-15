@@ -42,3 +42,4 @@ if __name__ == '__main__':
     KMeans_test.fit(test)
     test_labels = KMeans_test.labels_
     test_players['cluster'] = test_labels
+    test_players.to_csv('~/capstone_project/data/cluster_test.csv')
