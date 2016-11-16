@@ -7,12 +7,9 @@ from collections import Counter
 from scipy.spatial.distance import pdist, squareform
 import matplotlib.pyplot as plt
 from scipy.cluster.hierarchy import linkage, dendrogram
+from sklearn.metrics import silhouette_score
 
-#kmeans
-# KMeans(n_clusters=8, init='k-means++', n_init=10, max_iter=300, tol=0.0001, \
-#     precompute_distances='auto', verbose=0, random_state=None, copy_x=True, n_jobs=1, algorithm='auto')
-# kmeans.fit()
-# kmeans.labels_
+
 
 
 
@@ -29,6 +26,26 @@ from scipy.cluster.hierarchy import linkage, dendrogram
 # for num, centroid in enumerate(top_centroids):
 #     print "%d: %s" % (num, ", ".join(features[i] for i in centroid))
 
+
+#dim reduction?
+# the t-SNE dimensionality reduction algorithm?
+
+
+def plot_k_sse(X, min_k, max_k):
+    """Plots sse for values of k between min_k and max_k
+    Args:
+    - X - feature matrix
+    - min_k, max_k - smallest and largest k to plot sse for
+    """
+    k_values = range(min_k, max_k+1)
+    sse_values = []
+    for k in k_values:
+        clusters = k_means(X, k=k)
+        sse_values.append(sse(clusters))
+    plt.plot(k_values, sse_values)
+    plt.xlabel('k')
+    plt.ylabel('sum squared error')
+    plt.show()
 
 
 if __name__ == '__main__':
