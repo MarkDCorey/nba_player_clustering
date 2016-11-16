@@ -26,7 +26,8 @@ def get_player_ids(year = '2016-17', only_curr = 0):
 
     player_ids = []
     for i in range(players.shape[0]):
-        if (players.FROM_YEAR.iloc[i] <= year_end) and (players.TO_YEAR.iloc[i] >= year_end):
+        #if player's start yr is <= than the last yr of season AND his end yr >= first year of season
+        if (players.FROM_YEAR.iloc[i] <= year_end) and (players.TO_YEAR.iloc[i] >= year_start):
             player_ids.append(players.PERSON_ID.iloc[i])
     player_ids.sort()
     return player_ids
@@ -74,7 +75,7 @@ def generate_player_summary_df(player_id_list):
                     'team_name':team_name,'dleague_flag':d_league_flag}
 
         lst_of_dicts.append(temp_dict)
-        time.sleep(1)
+        # time.sleep(1)
 
     player_summary_df = pd.DataFrame(lst_of_dicts)
     player_summary_df.set_index('player_id',inplace = True, drop = True)
@@ -86,6 +87,7 @@ def generate_player_shot_df(player_id_list,year):
     lst_of_dicts = []
 
     for id in player_id_list:
+        print id
         #get the shotchart for player
         shot_type= shotchart.ShotChart(id, season = year).shot_chart()
         if not shot_type.empty:
@@ -135,7 +137,6 @@ def generate_player_shot_df(player_id_list,year):
                             (shots['SHOT_GRP']== '2PT Field Goal_Tip Layup Shot')| \
                             (shots['SHOT_GRP']== '2PT Field Goal_Alley Oop Dunk Shot')| \
                             (shots['SHOT_GRP']== '2PT Field Goal_Alley Oop Layup shot')| \
-                            (shots['SHOT_GRP']== '2PT Field Goal_Tip Layup Shot')| \
                             (shots['SHOT_GRP']== '2PT Field Goal_Finger Roll Layup Shot'),\
                         'SHOT_ATTEMPTED_FLAG'].sum()
 
@@ -149,14 +150,15 @@ def generate_player_shot_df(player_id_list,year):
                             (shots['SHOT_GRP']== '2PT Field Goal_Tip Layup Shot')| \
                             (shots['SHOT_GRP']== '2PT Field Goal_Alley Oop Dunk Shot')| \
                             (shots['SHOT_GRP']== '2PT Field Goal_Alley Oop Layup shot')| \
-                            (shots['SHOT_GRP']== '2PT Field Goal_Tip Layup Shot')| \
                             (shots['SHOT_GRP']== '2PT Field Goal_Finger Roll Layup Shot'),\
                         'SHOT_MADE_FLAG'].sum()
 
             attempt_cut_run_2 = shots.loc[(shots['SHOT_GRP']== '2PT Field Goal_Running Alley Oop Dunk Shot')| \
+                            (shots['SHOT_GRP']== '2PT Field Goal_Running Alley Oop Layup Shot')| \
                             (shots['SHOT_GRP']== '2PT Field Goal_Running Dunk Shot')| \
                             (shots['SHOT_GRP']== '2PT Field Goal_Running Finger Roll Layup Shot')| \
                             (shots['SHOT_GRP']== '2PT Field Goal_Running Layup Shot')| \
+                            (shots['SHOT_GRP']== '2PT Field Goal_Running Hook Shot')| \
                             (shots['SHOT_GRP']== '2PT Field Goal_Cutting Dunk Shot')| \
                             (shots['SHOT_GRP']== '2PT Field Goal_Cutting Finger Roll Layup Shot')| \
                             (shots['SHOT_GRP']== '2PT Field Goal_Cutting Layup Shot')| \
@@ -165,9 +167,11 @@ def generate_player_shot_df(player_id_list,year):
                         'SHOT_ATTEMPTED_FLAG'].sum()
 
             made_cut_run_2 = shots.loc[(shots['SHOT_GRP']== '2PT Field Goal_Running Alley Oop Dunk Shot')| \
+                            (shots['SHOT_GRP']== '2PT Field Goal_Running Alley Oop Layup Shot')| \
                             (shots['SHOT_GRP']== '2PT Field Goal_Running Dunk Shot')| \
                             (shots['SHOT_GRP']== '2PT Field Goal_Running Finger Roll Layup Shot')| \
                             (shots['SHOT_GRP']== '2PT Field Goal_Running Layup Shot')| \
+                            (shots['SHOT_GRP']== '2PT Field Goal_Running Hook Shot')| \
                             (shots['SHOT_GRP']== '2PT Field Goal_Cutting Dunk Shot')| \
                             (shots['SHOT_GRP']== '2PT Field Goal_Cutting Finger Roll Layup Shot')| \
                             (shots['SHOT_GRP']== '2PT Field Goal_Cutting Layup Shot')| \
@@ -193,7 +197,7 @@ def generate_player_shot_df(player_id_list,year):
                             (shots['SHOT_GRP']== '2PT Field Goal_Fadeaway Bank shot')| \
                             (shots['SHOT_GRP']== '2PT Field Goal_Fadeaway Jump Shot')| \
                             (shots['SHOT_GRP']== '2PT Field Goal_Jump Bank Shot')| \
-                            (shots['SHOT_GRP']== '2PT Field Goal_Jump Shot')| \
+                            (shots['SHOT_GRP']== '2PT Field Goal_Driving Jump shot')| \
                             (shots['SHOT_GRP']== '2PT Field Goal_Step Back Bank Jump Shot')| \
                             (shots['SHOT_GRP']== '2PT Field Goal_Step Back Jump shot'), \
                         'SHOT_ATTEMPTED_FLAG'].sum()
@@ -202,16 +206,40 @@ def generate_player_shot_df(player_id_list,year):
                             (shots['SHOT_GRP']== '2PT Field Goal_Fadeaway Bank shot')| \
                             (shots['SHOT_GRP']== '2PT Field Goal_Fadeaway Jump Shot')| \
                             (shots['SHOT_GRP']== '2PT Field Goal_Jump Bank Shot')| \
-                            (shots['SHOT_GRP']== '2PT Field Goal_Jump Shot')| \
+                            (shots['SHOT_GRP']== '2PT Field Goal_Driving Jump shot')| \
                             (shots['SHOT_GRP']== '2PT Field Goal_Step Back Bank Jump Shot')| \
                             (shots['SHOT_GRP']== '2PT Field Goal_Step Back Jump shot'), \
                         'SHOT_MADE_FLAG'].sum()
+
+            attempt_post_2 = shots.loc[(shots['SHOT_GRP']== '2PT Field Goal_Turnaround Bank shot')| \
+                            (shots['SHOT_GRP']== '2PT Field Goal_Turnaround Fadeaway Bank Jump Shot')| \
+                            (shots['SHOT_GRP']== '2PT Field Goal_Turnaround Fadeaway shot')| \
+                            (shots['SHOT_GRP']== '2PT Field Goal_Turnaround Hook Shot')| \
+                            (shots['SHOT_GRP']== '2PT Field Goal_Hook Bank Shot')| \
+                            (shots['SHOT_GRP']== '2PT Field Goal_Turnaround Jump Shot')| \
+                            (shots['SHOT_GRP']== '2PT Field Goal_Turnaround Bank Hook Shot')| \
+                            (shots['SHOT_GRP']== '2PT Field Goal_Hook Shot'), \
+                        'SHOT_ATTEMPTED_FLAG'].sum()
+
+            made_post_2 = shots.loc[(shots['SHOT_GRP']== '2PT Field Goal_Turnaround Bank shot')| \
+                            (shots['SHOT_GRP']== '2PT Field Goal_Turnaround Fadeaway Bank Jump Shot')| \
+                            (shots['SHOT_GRP']== '2PT Field Goal_Turnaround Fadeaway shot')| \
+                            (shots['SHOT_GRP']== '2PT Field Goal_Turnaround Hook Shot')| \
+                            (shots['SHOT_GRP']== '2PT Field Goal_Hook Bank Shot')| \
+                            (shots['SHOT_GRP']== '2PT Field Goal_Turnaround Jump Shot')| \
+                            (shots['SHOT_GRP']== '2PT Field Goal_Turnaround Bank Hook Shot')| \
+                            (shots['SHOT_GRP']== '2PT Field Goal_Hook Shot'), \
+                        'SHOT_MADE_FLAG'].sum()
+
 
             attempt_off_dribble_3 = shots.loc[(shots['SHOT_GRP']== '3PT Field Goal_Running Pull-Up Jump Shot')| \
                             (shots['SHOT_GRP']== '3PT Field Goal_Pullup Jump shot')| \
                             (shots['SHOT_GRP']== '3PT Field Goal_Running Jump Shot')| \
                             (shots['SHOT_GRP']== '3PT Field Goal_Pullup Bank shot')| \
                             (shots['SHOT_GRP']== '3PT Field Goal_Driving Bank shot')| \
+                            (shots['SHOT_GRP']== '3PT Field Goal_Driving Bank Hook Shot')| \
+                            (shots['SHOT_GRP']== '3PT Field Goal_Driving Floating Jump Shot')| \
+                            (shots['SHOT_GRP']== '3PT Field Goal_Driving Floating Bank Jump Shot')| \
                             (shots['SHOT_GRP']== '3PT Field Goal_Floating Jump shot'), \
                         'SHOT_ATTEMPTED_FLAG'].sum()
 
@@ -219,41 +247,41 @@ def generate_player_shot_df(player_id_list,year):
                             (shots['SHOT_GRP']== '3PT Field Goal_Pullup Jump shot')| \
                             (shots['SHOT_GRP']== '3PT Field Goal_Running Jump Shot')| \
                             (shots['SHOT_GRP']== '3PT Field Goal_Pullup Bank shot')| \
+                            (shots['SHOT_GRP']== '3PT Field Goal_Driving Bank Hook Shot')| \
                             (shots['SHOT_GRP']== '3PT Field Goal_Driving Bank shot')| \
+                            (shots['SHOT_GRP']== '3PT Field Goal_Driving Floating Jump Shot')| \
+                            (shots['SHOT_GRP']== '3PT Field Goal_Driving Floating Bank Jump Shot')| \
                             (shots['SHOT_GRP']== '3PT Field Goal_Floating Jump shot'), \
                         'SHOT_MADE_FLAG'].sum()
 
             attempt_jumper_3 = shots.loc[(shots['SHOT_GRP']== '3PT Field Goal_Step Back Jump shot')| \
                             (shots['SHOT_GRP']== '3PT Field Goal_Turnaround Jump Shot')| \
                             (shots['SHOT_GRP']== '3PT Field Goal_Turnaround Bank shot')| \
+                            (shots['SHOT_GRP']== '3PT Field Goal_Jump Shot')| \
+                            (shots['SHOT_GRP']== '3PT Field Goal_Hook Shot')| \
                             (shots['SHOT_GRP']== '3PT Field Goal_Jump Bank Shot')| \
                             (shots['SHOT_GRP']== '3PT Field Goal_Fadeaway Jump Shot')| \
-                            (shots['SHOT_GRP']== '3PT Field Goal_Fadeaway Bank shot'), \
+                            (shots['SHOT_GRP']== '3PT Field Goal_Fadeaway Bank shot') |\
+                            (shots['SHOT_GRP']== '3PT Field Goal_Turnaround Hook Shot')| \
+                            (shots['SHOT_GRP']== '3PT Field Goal_Turnaround Bank Hook Shot')| \
+                            (shots['SHOT_GRP']== '3PT Field Goal_Turnaround Fadeaway Bank Jump Shot')|\
+                            (shots['SHOT_GRP']== '3PT Field Goal_Step Back Bank Jump Shot')|\
+                            (shots['SHOT_GRP']== '3PT Field Goal_Turnaround Fadeaway shot'), \
                         'SHOT_ATTEMPTED_FLAG'].sum()
 
             made_jumper_3 = shots.loc[(shots['SHOT_GRP']== '3PT Field Goal_Step Back Jump shot')| \
                             (shots['SHOT_GRP']== '3PT Field Goal_Turnaround Jump Shot')| \
                             (shots['SHOT_GRP']== '3PT Field Goal_Turnaround Bank shot')| \
                             (shots['SHOT_GRP']== '3PT Field Goal_Jump Shot')| \
+                            (shots['SHOT_GRP']== '3PT Field Goal_Hook Shot')| \
                             (shots['SHOT_GRP']== '3PT Field Goal_Jump Bank Shot')| \
                             (shots['SHOT_GRP']== '3PT Field Goal_Fadeaway Jump Shot')| \
-                            (shots['SHOT_GRP']== '3PT Field Goal_Fadeaway Bank shot'), \
-                        'SHOT_MADE_FLAG'].sum()
-
-            attempt_post_2 = shots.loc[(shots['SHOT_GRP']== '2PT Field Goal_Turnaround Bank shot')| \
-                            (shots['SHOT_GRP']== '2PT Field Goal_Turnaround Fadeaway Bank Jump Shot')| \
-                            (shots['SHOT_GRP']== '2PT Field Goal_Turnaround Fadeaway shot')| \
-                            (shots['SHOT_GRP']== '2PT Field Goal_Turnaround Hook Shot')| \
-                            (shots['SHOT_GRP']== '2PT Field Goal_Turnaround Jump Shot')| \
-                            (shots['SHOT_GRP']== '2PT Field Goal_Hook Shot'), \
-                        'SHOT_ATTEMPTED_FLAG'].sum()
-
-            made_post_2 = shots.loc[(shots['SHOT_GRP']== '2PT Field Goal_Turnaround Bank shot')| \
-                            (shots['SHOT_GRP']== '2PT Field Goal_Turnaround Fadeaway Bank Jump Shot')| \
-                            (shots['SHOT_GRP']== '2PT Field Goal_Turnaround Hook Shot')| \
-                            (shots['SHOT_GRP']== '3PT Field Goal_Pullup Bank shot')| \
-                            (shots['SHOT_GRP']== '2PT Field Goal_Turnaround Jump Shot')| \
-                            (shots['SHOT_GRP']== '2PT Field Goal_Hook Shot'), \
+                            (shots['SHOT_GRP']== '3PT Field Goal_Fadeaway Bank shot')| \
+                            (shots['SHOT_GRP']== '3PT Field Goal_Turnaround Hook Shot')| \
+                            (shots['SHOT_GRP']== '3PT Field Goal_Turnaround Bank Hook Shot')| \
+                            (shots['SHOT_GRP']== '3PT Field Goal_Turnaround Fadeaway Bank Jump Shot')|\
+                            (shots['SHOT_GRP']== '3PT Field Goal_Step Back Bank Jump Shot')|\
+                            (shots['SHOT_GRP']== '3PT Field Goal_Turnaround Fadeaway shot'), \
                         'SHOT_MADE_FLAG'].sum()
 
 
@@ -290,7 +318,7 @@ def generate_player_shot_df(player_id_list,year):
             lst_of_dicts.append(temp_dict_empty)
 
 
-            time.sleep(1)
+            # time.sleep(1)
 
     player_shot_df = pd.DataFrame(lst_of_dicts)
     player_shot_df.set_index('player_id',inplace = True, drop=True)
@@ -306,7 +334,7 @@ def generate_catch_shoot_df(player_id_lst, year):
             shooting.fillna(0,inplace=True)
             catch_shoot_freq = float(shooting.FGA_FREQUENCY[shooting.SHOT_TYPE == 'Catch and Shoot'])
             lst_of_dicts.append({'player_id':str(id), 'catch_shoot_freq':catch_shoot_freq})
-            time.sleep(1)
+            # time.sleep(1)
         else:
             lst_of_dicts.append({'player_id':str(id), 'catch_shoot_freq':0})
 
@@ -318,6 +346,7 @@ def generate_catch_shoot_df(player_id_lst, year):
 def generate_overalls_df(player_id_lst, year):
     lst_of_dicts = []
     for id in player_id_lst:
+        print id
         stats = player.PlayerYearOverYearSplits(id).by_year()
         stats = stats[stats.GROUP_VALUE == year]
         if not stats.empty:
@@ -340,14 +369,14 @@ def generate_overalls_df(player_id_lst, year):
                               'ftm':ftm,'fta':fta,'oreb':oreb,'dreb':dreb,
                               'reb':reb,'ast':ast,'tov':tov,'stl':stl,'blk':blk,
                               'blk_a':blk_a,'pfd':pfd,'pf':pf})
-            time.sleep(1)
+            # time.sleep(1)
 
         else:
             lst_of_dicts.append({'player_id':str(id),'gp':0,'min_game':0,
                               'ftm':0,'fta':0,'oreb':0,'dreb':0,
                               'reb':0,'ast':0,'tov':0,'stl':0,'blk':0,
                               'blk_a':0,'pfd':0,'pf':0})
-            time.sleep(1)
+            # time.sleep(1)
 
     overalls_df = pd.DataFrame(lst_of_dicts)
     overalls_df.set_index('player_id',inplace = True, drop = True)
@@ -357,13 +386,14 @@ def generate_overalls_df(player_id_lst, year):
 def generate_rebounding_df(player_id_lst,year):
     lst_of_dicts = []
     for id in player_id_lst:
+        print id
         rebounding = player.PlayerReboundTracking(id, season=year).num_contested_rebounding()
         if not rebounding.empty:
             c_oreb_game = float(rebounding.C_OREB.sum())
             c_dreb_game = float(rebounding.C_DREB.sum())
 
             lst_of_dicts.append({'player_id':str(id),'c_oreb_game':c_oreb_game,'c_dreb_game':c_dreb_game})
-            time.sleep(1)
+            # time.sleep(1)
 
         else:
             lst_of_dicts.append({'player_id':str(id),'c_oreb_game':0,'c_dreb_game':0})
@@ -378,6 +408,7 @@ def generate_speed_dist_df(player_id_lst,year):
     league_speed_dist = league.PlayerSpeedDistanceTracking(season = year).overall()
 
     for id in player_id_lst:
+        print id
         player_speed_dist = league_speed_dist[league_speed_dist.PLAYER_ID == int(id)]
         if not player_speed_dist.empty:
             mi_game_tot = float(player_speed_dist.DIST_MILES)
@@ -391,14 +422,14 @@ def generate_speed_dist_df(player_id_lst,year):
                              'mi_game_off':mi_game_off,'mi_game_def':mi_game_def,
                              'avg_speed_tot':avg_speed_tot,'avg_speed_off':avg_speed_off,
                              'avg_speed_def':avg_speed_def})
-            time.sleep(1)
+            # time.sleep(1)
 
         else:
             lst_of_dicts.append({'player_id':str(id),'mi_game_tot':0,
                              'mi_game_off':0,'mi_game_def':0,
                              'avg_speed_tot':0,'avg_speed_off':0,
                              'avg_speed_def':0})
-            time.sleep(1)
+            # time.sleep(1)
 
     speed_dist_df = pd.DataFrame(lst_of_dicts)
     speed_dist_df.set_index('player_id',inplace = True, drop = True)
@@ -410,6 +441,7 @@ def generate_defense_df(player_id_lst,year):
     lst_of_dicts = []
 
     for id in player_id_lst:
+        print id
         player_defense = player.PlayerDefenseTracking(id, season = year).overall()
         if not player_defense.empty:
 
@@ -430,7 +462,7 @@ def generate_defense_df(player_id_lst,year):
                         'd_fgm_paint':d_fgm_paint,'d_fga_paint':d_fga_paint,'d_ppm_paint':d_ppm_paint,
                         'd_fgm_perim':d_fgm_perim,'d_fga_perim':d_fga_perim,'d_ppm_perim':d_ppm_perim
                         })
-            time.sleep(1)
+            # time.sleep(1)
 
         else:
             lst_of_dicts.append({'player_id':str(id),
@@ -449,12 +481,13 @@ def generate_pass_df(player_id_lst, year):
     lst_of_dicts = []
 
     for id in player_id_lst:
+        print id
         player_pass = player.PlayerPassTracking(id, season = year).passes_made()
         if not player_pass.empty:
             passes = (player_pass.PASS * player_pass.G)
             pass_total = passes.sum()
             lst_of_dicts.append({'player_id':str(id),'pass_total':float(pass_total)})
-            time.sleep(1)
+            # time.sleep(1)
 
         else:
             lst_of_dicts.append({'player_id':str(id),'pass_total':0})
@@ -468,19 +501,28 @@ def generate_pass_df(player_id_lst, year):
 
 
 if __name__ == '__main__':
-    #create ordered list of player ids
     year = '2015-16'
-    player_ids = get_player_ids(year = year)
+    #create ordered list of player ids
+    print 'Get player_ids'
+    player_ids = get_player_ids(year = '2015-16')
     # player_ids = player_ids[:3]
 
     #clean and munge
+    print 'Create summary_df'
     summary_df = generate_player_summary_df(player_ids)
+    print 'Create shot_df'
     shot_df = generate_player_shot_df(player_ids,year)
+    print 'Create catch_shoot_df'
     catch_shoot_df = generate_catch_shoot_df(player_ids, year)
+    print 'Create overalls_df'
     overalls_df = generate_overalls_df(player_ids,year)
+    print 'Create rebounding_df'
     rebounding_df = generate_rebounding_df(player_ids,year)
+    print 'Create speed_dist_df'
     speed_dist_df = generate_speed_dist_df(player_ids, year)
+    print 'Create defense_df'
     defense_df = generate_defense_df(player_ids, year)
+    print 'Create pass_df'
     pass_df = generate_pass_df(player_ids, year)
 
     #create master df

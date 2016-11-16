@@ -2,7 +2,9 @@
 -What features are most representative of each cluster?
 -What players?
 -present feature and player cloud (within cluster size/color variations)
-
+-tsne
+pca - for interpretability
+nmf features by topic, more interpretable than pca
 
 #TEAM DYNAMICS
 -overlay clusters on lineup data
