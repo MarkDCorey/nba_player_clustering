@@ -99,15 +99,16 @@ player_data = pd.read_csv('~/capstone_project/data/aggregated_player_data.csv')
 player_data.fillna(0, inplace = True)
 
 #reduce the df
-include = ['player_id','display_name','age','height','weight','season_exp','min_game','catch_shoot_freq',
+include = ['player_id','display_name','height','weight','season_exp','min_game',
 'attempt_at_rim_2','attempt_cut_run_2','attempt_drive_2','attempt_jumper_2','attempt_jumper_3',
 'attempt_off_dribble_2','attempt_off_dribble_3','attempt_post_2','made_at_rim_2',
 'made_cut_run_2','made_drive_2','made_jumper_2','made_jumper_3','made_off_dribble_2',
 'made_off_dribble_3','made_post_2','ast','blk','blk_a','dreb','fta','ftm','gp',
 'oreb','stl','tov','c_dreb_game','c_oreb_game',
-'avg_speed_def','avg_speed_off','mi_game_def','mi_game_off','d_fga_overall','d_fga_paint','d_fga_perim',
-'d_fgm_overall','d_fgm_paint','d_fgm_perim','d_ppm_overall','d_ppm_paint','d_ppm_perim','pass_total']
+'mi_game_def','mi_game_off','d_fga_overall','d_fga_paint','d_fga_perim',
+'d_fgm_overall','d_fgm_paint','d_fgm_perim','pass_total']
 
+#removed age, catch_shoot_freq,'avg_speed_def','avg_speed_off',,'d_ppm_overall','d_ppm_paint','d_ppm_perim',
 
 player_data_rd = player_data[include]
 #
@@ -155,7 +156,7 @@ player_data_rd['tov_min'] = (player_data_rd['tov']*player_data_rd['gp'])/player_
 player_data_rd['eff_ft'] = player_data_rd['ftm']/player_data_rd['fta']
 
 #ast/turnover efficiency
-player_data_rd['ast_tov'] = player_data_rd['ast']/player_data_rd['tov']
+# player_data_rd['ast_tov'] = player_data_rd['ast']/player_data_rd['tov']
 
 #use contested rb as a separate feature to reb.  is this redundant
 player_data_rd['c_dreb_min'] = (player_data_rd['c_dreb_game']*player_data_rd['gp'])/player_data_rd['min_tot']
@@ -176,7 +177,7 @@ player_data_rd['mi_def_min'] = (player_data_rd['mi_game_def']*player_data_rd['gp
 player_data_rd['mi_off_min'] = (player_data_rd['mi_game_off']*player_data_rd['gp'])/player_data_rd['min_tot']
 
 #passes per min
-player_data_rd['pass_min']= player_data_rd['pass_total']/player_data_rd['min_tot']
+# player_data_rd['pass_min']= player_data_rd['pass_total']/player_data_rd['min_tot']
 
 
 #...and drop these
