@@ -23,6 +23,7 @@ def add_clusters_to_lineups(lineups_df, clusters_df):
 
         #iterate over the lineup_ids list
         for player_id in lineup:
+            print player_id
             #for each id in the list to pull the corresponding cluster from player_clusters
             player_cluster = player_clusters['cluster'][player_clusters['player_id'] == player_id]
             clusters_temp.append(int(player_cluster.iloc[0]))

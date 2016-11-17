@@ -83,12 +83,14 @@ mi_game_tot
 d_fga_overall
 d_fga_paint
 d_fga_perim
+d_fga_mid
+d_fga_threes
 d_fgm_overall
 d_fgm_paint
 d_fgm_perim
-d_ppm_overall
-d_ppm_paint
-d_ppm_perim
+d_fgm_mid
+d_fgm_threes
+
 
 #total passes for season
 pass_total
@@ -105,8 +107,8 @@ include = ['player_id','display_name','height','weight','season_exp','min_game',
 'made_cut_run_2','made_drive_2','made_jumper_2','made_jumper_3','made_off_dribble_2',
 'made_off_dribble_3','made_post_2','ast','blk','blk_a','dreb','fta','ftm','gp',
 'oreb','stl','tov','c_dreb_game','c_oreb_game',
-'mi_game_def','mi_game_off','d_fga_overall','d_fga_paint','d_fga_perim',
-'d_fgm_overall','d_fgm_paint','d_fgm_perim','pass_total']
+'mi_game_def','mi_game_off','d_fga_mid','d_fga_threes','d_fga_paint','d_fga_perim',
+'d_fgm_mid','d_fgm_threes','d_fgm_paint','d_fgm_perim','pass_total']
 
 #removed age, catch_shoot_freq,'avg_speed_def','avg_speed_off',,'d_ppm_overall','d_ppm_paint','d_ppm_perim',
 
@@ -132,14 +134,14 @@ player_data_rd['attempt_post_2_min'] = player_data_rd['attempt_post_2']/player_d
 # player_data_rd['made_off_dribble_2_min'] = player_data_rd['made_off_dribble_2']/player_data_rd['min_tot']
 # player_data_rd['made_off_dribble_3_min'] = player_data_rd['made_off_dribble_3']/player_data_rd['min_tot']
 # player_data_rd['made_post_2_min'] = player_data_rd['made_post_2']/player_data_rd['min_tot']
-player_data_rd['eff_at_rim_2'] = player_data_rd['made_at_rim_2']/player_data_rd['attempt_at_rim_2']
-player_data_rd['eff_cut_run_2'] = player_data_rd['made_cut_run_2']/player_data_rd['attempt_cut_run_2']
-player_data_rd['eff_drive_2'] = player_data_rd['made_drive_2']/player_data_rd['attempt_drive_2']
-player_data_rd['eff_jumper_2'] = player_data_rd['made_jumper_2']/player_data_rd['attempt_jumper_2']
-player_data_rd['eff_jumper_3'] = player_data_rd['made_jumper_3']/player_data_rd['attempt_jumper_3']
-player_data_rd['eff_off_dribble_2'] = player_data_rd['made_off_dribble_2']/player_data_rd['attempt_off_dribble_2']
-player_data_rd['eff_off_dribble_3'] = player_data_rd['made_off_dribble_3']/player_data_rd['attempt_off_dribble_3']
-player_data_rd['eff_post_2'] = player_data_rd['made_post_2']/player_data_rd['attempt_post_2']
+player_data_rd['eff_at_rim_2'] = (player_data_rd['made_at_rim_2']/player_data_rd['attempt_at_rim_2']) if player_data_rd['attempt_at_rim_2'] > 10 else 0.
+player_data_rd['eff_cut_run_2'] = player_data_rd['made_cut_run_2']/player_data_rd['attempt_cut_run_2'] if player_data_rd['attempt_cut_run_2'] > 10 else 0.
+player_data_rd['eff_drive_2'] = player_data_rd['made_drive_2']/player_data_rd['attempt_drive_2'] if player_data_rd['attempt_drive_2'] > 10 else 0.
+player_data_rd['eff_jumper_2'] = player_data_rd['made_jumper_2']/player_data_rd['attempt_jumper_2'] if player_data_rd['attempt_jumper_2'] > 10 else 0.
+player_data_rd['eff_jumper_3'] = player_data_rd['made_jumper_3']/player_data_rd['attempt_jumper_3'] if player_data_rd['attempt_jumper_3'] > 10 else 0.
+player_data_rd['eff_off_dribble_2'] = player_data_rd['made_off_dribble_2']/player_data_rd['attempt_off_dribble_2'] if player_data_rd['attempt_off_dribble_2'] > 10 else 0.
+player_data_rd['eff_off_dribble_3'] = player_data_rd['made_off_dribble_3']/player_data_rd['attempt_off_dribble_3'] if player_data_rd['attempt_off_dribble_3'] > 10 else 0.
+player_data_rd['eff_post_2'] = player_data_rd['made_post_2']/player_data_rd['attempt_post_2'] if player_data_rd['attempt_post_2'] > 10 else 0.
 
 #standardizing to per min
 player_data_rd['ast_min'] = (player_data_rd['ast']*player_data_rd['gp'])/player_data_rd['min_tot']
@@ -156,7 +158,7 @@ player_data_rd['tov_min'] = (player_data_rd['tov']*player_data_rd['gp'])/player_
 player_data_rd['eff_ft'] = player_data_rd['ftm']/player_data_rd['fta']
 
 #ast/turnover efficiency
-# player_data_rd['ast_tov'] = player_data_rd['ast']/player_data_rd['tov']
+player_data_rd['ast_tov'] = player_data_rd['ast']/player_data_rd['tov']
 
 #use contested rb as a separate feature to reb.  is this redundant
 player_data_rd['c_dreb_min'] = (player_data_rd['c_dreb_game']*player_data_rd['gp'])/player_data_rd['min_tot']
@@ -165,19 +167,21 @@ player_data_rd['c_oreb_min'] = (player_data_rd['c_oreb_game']*player_data_rd['gp
 #d_fga useful to determine how often they are guarding the ball per min
 player_data_rd['d_fga_paint_min'] = (player_data_rd['d_fga_paint']*player_data_rd['gp'])/player_data_rd['min_tot']
 player_data_rd['d_fga_perim_min'] = (player_data_rd['d_fga_perim']*player_data_rd['gp'])/player_data_rd['min_tot']
-player_data_rd['d_fga_overall_min'] = (player_data_rd['d_fga_overall']*player_data_rd['gp'])/player_data_rd['min_tot']
-#
+player_data_rd['d_fga_mid_min'] = (player_data_rd['d_fga_mid']*player_data_rd['gp'])/player_data_rd['min_tot']
+player_data_rd['d_fga_threes_min'] = (player_data_rd['d_fga_threes']*player_data_rd['gp'])/player_data_rd['min_tot']
+
 #efficiency for each
 player_data_rd['d_eff_paint'] = player_data_rd['d_fgm_paint']/player_data_rd['d_fga_paint']
 player_data_rd['d_eff_perim'] = player_data_rd['d_fgm_perim']/player_data_rd['d_fga_perim']
-player_data_rd['d_eff_overall'] = player_data_rd['d_fgm_overall']/ player_data_rd['d_fga_overall']
+player_data_rd['d_eff_mid'] = player_data_rd['d_fgm_mid']/player_data_rd['d_fga_mid']
+player_data_rd['d_eff_threes'] = player_data_rd['d_fgm_threes']/player_data_rd['d_fga_threes']
 
 #how much ground they are covering per min on off and def
 player_data_rd['mi_def_min'] = (player_data_rd['mi_game_def']*player_data_rd['gp'])/player_data_rd['min_tot']
 player_data_rd['mi_off_min'] = (player_data_rd['mi_game_off']*player_data_rd['gp'])/player_data_rd['min_tot']
 
 #passes per min
-# player_data_rd['pass_min']= player_data_rd['pass_total']/player_data_rd['min_tot']
+player_data_rd['pass_min']= player_data_rd['pass_total']/player_data_rd['min_tot']
 
 
 #...and drop these
@@ -185,8 +189,8 @@ drp = ['attempt_at_rim_2','attempt_cut_run_2','attempt_drive_2','attempt_jumper_
 'attempt_jumper_3','attempt_off_dribble_2','attempt_off_dribble_3','attempt_post_2',
 'made_at_rim_2','made_cut_run_2','made_drive_2','made_jumper_2','made_jumper_3',
 'made_off_dribble_2','made_off_dribble_3','made_post_2','ast','blk','blk_a','dreb','oreb',
-'fta','ftm','stl','tov','c_dreb_game','c_oreb_game','d_fga_paint','d_fga_perim','d_fga_overall',
-'d_fgm_overall','d_fgm_paint','d_fgm_perim','mi_game_def','mi_game_off','pass_total','gp','min_tot']
+'fta','ftm','stl','tov','c_dreb_game','c_oreb_game','d_fga_paint','d_fga_perim','d_fga_mid','d_fga_threes',
+'d_fgm_mid','d_fgm_threes','d_fgm_paint','d_fgm_perim','mi_game_def','mi_game_off','pass_total','gp']
 
 
 
