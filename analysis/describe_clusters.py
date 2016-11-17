@@ -93,7 +93,12 @@ if __name__ == '__main__':
 
 
     cluster_feat_df = cluster_feat_analyis(feature_stats, feats_clusters)
-    test = cluster_rank_features(cluster_feat_df, 1)
+
+    for i in range(10):
+        test = cluster_rank_features(cluster_feat_df, i)
+        print'Cluster: ',i
+        print'Top 10: ',test[['feature','std_from_avg']][:10]
+        print ''
 
     #append clusters to
 

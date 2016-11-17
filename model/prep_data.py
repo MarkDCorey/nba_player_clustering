@@ -97,7 +97,7 @@ pass_total
 '''
 
 #read in data to df
-player_data = pd.read_csv('~/capstone_project/data/aggregated_player_data.csv')
+player_data = pd.read_csv('~/capstone_project/data/aggregated_player_data_15_16.csv')
 player_data.fillna(0, inplace = True)
 
 #reduce the df
@@ -134,14 +134,14 @@ player_data_rd['attempt_post_2_min'] = player_data_rd['attempt_post_2']/player_d
 # player_data_rd['made_off_dribble_2_min'] = player_data_rd['made_off_dribble_2']/player_data_rd['min_tot']
 # player_data_rd['made_off_dribble_3_min'] = player_data_rd['made_off_dribble_3']/player_data_rd['min_tot']
 # player_data_rd['made_post_2_min'] = player_data_rd['made_post_2']/player_data_rd['min_tot']
-player_data_rd['eff_at_rim_2'] = (player_data_rd['made_at_rim_2']/player_data_rd['attempt_at_rim_2']) if player_data_rd['attempt_at_rim_2'] > 10 else 0.
-player_data_rd['eff_cut_run_2'] = player_data_rd['made_cut_run_2']/player_data_rd['attempt_cut_run_2'] if player_data_rd['attempt_cut_run_2'] > 10 else 0.
-player_data_rd['eff_drive_2'] = player_data_rd['made_drive_2']/player_data_rd['attempt_drive_2'] if player_data_rd['attempt_drive_2'] > 10 else 0.
-player_data_rd['eff_jumper_2'] = player_data_rd['made_jumper_2']/player_data_rd['attempt_jumper_2'] if player_data_rd['attempt_jumper_2'] > 10 else 0.
-player_data_rd['eff_jumper_3'] = player_data_rd['made_jumper_3']/player_data_rd['attempt_jumper_3'] if player_data_rd['attempt_jumper_3'] > 10 else 0.
-player_data_rd['eff_off_dribble_2'] = player_data_rd['made_off_dribble_2']/player_data_rd['attempt_off_dribble_2'] if player_data_rd['attempt_off_dribble_2'] > 10 else 0.
-player_data_rd['eff_off_dribble_3'] = player_data_rd['made_off_dribble_3']/player_data_rd['attempt_off_dribble_3'] if player_data_rd['attempt_off_dribble_3'] > 10 else 0.
-player_data_rd['eff_post_2'] = player_data_rd['made_post_2']/player_data_rd['attempt_post_2'] if player_data_rd['attempt_post_2'] > 10 else 0.
+player_data_rd['eff_at_rim_2'] = (player_data_rd['made_at_rim_2']/player_data_rd['attempt_at_rim_2'])
+player_data_rd['eff_cut_run_2'] = player_data_rd['made_cut_run_2']/player_data_rd['attempt_cut_run_2']
+player_data_rd['eff_drive_2'] = player_data_rd['made_drive_2']/player_data_rd['attempt_drive_2'] #if player_data_rd['attempt_drive_2'] > 10 else 0.
+player_data_rd['eff_jumper_2'] = player_data_rd['made_jumper_2']/player_data_rd['attempt_jumper_2'] #if player_data_rd['attempt_jumper_2'] > 10 else 0.
+player_data_rd['eff_jumper_3'] = player_data_rd['made_jumper_3']/player_data_rd['attempt_jumper_3'] #if player_data_rd['attempt_jumper_3'] > 10 else 0.
+player_data_rd['eff_off_dribble_2'] = player_data_rd['made_off_dribble_2']/player_data_rd['attempt_off_dribble_2'] #if player_data_rd['attempt_off_dribble_2'] > 10 else 0.
+player_data_rd['eff_off_dribble_3'] = player_data_rd['made_off_dribble_3']/player_data_rd['attempt_off_dribble_3'] #if player_data_rd['attempt_off_dribble_3'] > 10 else 0.
+player_data_rd['eff_post_2'] = player_data_rd['made_post_2']/player_data_rd['attempt_post_2'] #if player_data_rd['attempt_post_2'] > 10 else 0.
 
 #standardizing to per min
 player_data_rd['ast_min'] = (player_data_rd['ast']*player_data_rd['gp'])/player_data_rd['min_tot']

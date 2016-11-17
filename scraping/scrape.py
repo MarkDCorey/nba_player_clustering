@@ -510,10 +510,10 @@ def generate_pass_df(player_id_lst, year):
 
 
 if __name__ == '__main__':
-    year = '2015-16'
+    year = '2014-15'
     #create ordered list of player ids
     print 'Get player_ids'
-    player_ids = get_player_ids(year = '2015-16')
+    player_ids = get_player_ids(year = '2014-15')
     # player_ids = player_ids[:3]
 
     #clean and munge
@@ -539,4 +539,4 @@ if __name__ == '__main__':
         rebounding_df, speed_dist_df, defense_df, pass_df], axis=1)
 
     #store df in csv
-    merged_df.to_csv('~/capstone_project/data/aggregated_player_data_15_16.csv')
+    merged_df.to_csv('~/capstone_project/data/aggregated_player_data_14_15.csv')
