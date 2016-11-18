@@ -156,17 +156,23 @@ if __name__ == '__main__':
     #,'age','height','weight','season_exp','min_game'
     test.fillna(0, inplace = True)
     test = normalize(test)
-    k_val = [10]
-    for i in k_val:
+    k_vals = [2,4,6,8,10,12,14,16]
+    inertia_list = []
+    for i in k_vals:
         KMeans_test = KMeans(n_clusters=i, init='k-means++', n_init=10, max_iter=300, tol=0.0001, \
         precompute_distances='auto', verbose=0, random_state=None, copy_x=True, n_jobs=1, algorithm='auto')
         KMeans_test.fit_transform(test)
         test_labels = KMeans_test.labels_
         test_players['cluster'] = test_labels
-        # print KMeans_test.score()
-    # test_players[test_players['cluster'] == 10]
-        # silhouette_analysis(test)
-        # score = silhouette_score(test, test_labels, metric='euclidean',sample_size=None)
-        # print(score)
-        print(KMeans_test.inertia_)
-    test_players.to_csv('~/capstone_project/data/cluster_test.csv')
+
+        s_score = silhouette_score(test, test_labels, metric='euclidean',sample_size=None)
+        inertia_list.append(KMeans_test.inertia_)
+        print('k_val: ',i)
+        print('s_score: ',s_score)
+        print('inertia: ',KMeans_test.inertia_)
+
+    plt.plot(k_vals, inertia_list)
+    plt.xlabel('k')
+    plt.ylabel('sum of error')
+    plt.show()
+    # test_players.to_csv('~/capstone_project/data/cluster_test.csv')

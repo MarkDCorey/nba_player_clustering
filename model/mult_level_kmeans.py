@@ -150,45 +150,81 @@ def plot_k_sse(X, min_k, max_k):
 if __name__ == '__main__':
     #read in the aggregated/saved data into a df
     featurized_data = pd.read_csv('~/capstone_project/data/featurized_data.csv')
-    featurized_data = featurized_data[featurized_data.min_game >25]
-    player_info = featurized_data[['player_id','display_name']]
-    featurized_data.drop(player_info,inplace = True, axis = 1)
+    featurized_data = featurized_data[featurized_data.min_game >10]
+    player_info_off = featurized_data[['player_id','display_name']]
+    player_info_def = featurized_data[['player_id','display_name']]
+    featurized_data.drop(['player_id','display_name','Unnamed: 0'],inplace = True, axis = 1)
     featurized_data.fillna(0, inplace = True)
 
-    #drop defensive cols
-    off_cols = ['attempt_at_rim_2_min','attempt_cut_run_2_min',
-                'attempt_drive_2_min','attempt_jumper_2_min','attempt_jumper_3_min','attempt_off_dribble_2_min',
-                'attempt_off_dribble_3_min','attempt_post_2_min','fta_min','eff_at_rim_2','eff_cut_run_2',
-                'eff_drive_2','eff_jumper_2','eff_jumper_3','eff_off_dribble_2','eff_off_dribble_3','eff_post_2',
-                'eff_ft']
-                # ,'ast_min','tov_min','pass_min']
 
-    reb_cols = ['dreb_min','oreb_min', 'c_dreb_min','c_oreb_min']
+    all_cols = ['height', 'weight', 'season_exp', 'min_game', 'min_tot',
+       'attempt_at_rim_2_min', 'attempt_cut_run_2_min',
+       'attempt_drive_2_min', 'attempt_jumper_2_min',
+       'attempt_jumper_3_min', 'attempt_off_dribble_2_min',
+       'attempt_off_dribble_3_min', 'attempt_post_2_min', 'eff_at_rim_2',
+       'eff_cut_run_2', 'eff_drive_2', 'eff_jumper_2', 'eff_jumper_3',
+       'eff_off_dribble_2', 'eff_off_dribble_3', 'eff_post_2', 'ast_min',
+       'blk_min', 'blk_a_min', 'dreb_min', 'oreb_min', 'fta_min',
+       'stl_min', 'tov_min', 'eff_ft', 'ast_tov', 'c_dreb_min',
+       'c_oreb_min', 'd_fga_paint_min', 'd_fga_perim_min', 'd_fga_mid_min',
+       'd_fga_threes_min', 'd_eff_paint', 'd_eff_perim', 'd_eff_mid',
+       'd_eff_threes', 'mi_def_min', 'mi_off_min', 'pass_min']
 
-    def_cols = ['blk_min','stl_min','d_fga_paint_min','d_fga_perim_min',
-                'd_eff_paint','d_eff_perim']
-                #'d_fga_overall_min','d_eff_overall',,'blk_a_min'
 
-    other_cols = ['season_exp','min_game','mi_def_min','mi_off_min','height','weight']
+    off_cols = ['attempt_at_rim_2_min', 'attempt_cut_run_2_min',
+                'attempt_drive_2_min', 'attempt_jumper_2_min',
+                'attempt_jumper_3_min', 'attempt_off_dribble_2_min',
+                'attempt_off_dribble_3_min', 'attempt_post_2_min', 'eff_at_rim_2',
+                'eff_cut_run_2', 'eff_drive_2', 'eff_jumper_2', 'eff_jumper_3',
+                'eff_off_dribble_2', 'eff_off_dribble_3', 'eff_post_2', 'ast_min',
+                'oreb_min', 'fta_min', 'tov_min','eff_ft', 'ast_tov', 'c_oreb_min']
+
+    def_cols = ['blk_min', 'blk_a_min','dreb_min','stl_min','c_dreb_min','d_fga_paint_min', 'd_fga_perim_min',
+    'd_fga_mid_min','d_fga_threes_min', 'd_eff_paint', 'd_eff_perim', 'd_eff_mid','d_eff_threes']
+
+    excluded_cols = ['mi_def_min', 'mi_off_min', 'pass_min','height', 'weight',
+                    'season_exp', 'min_game', 'min_tot']
 
     offensive = featurized_data[off_cols]
     defensive = featurized_data[def_cols]
-    rebounding = featurized_data[reb_cols]
-    all_cols = featurized_data[off_cols+def_cols+reb_cols+other_cols]
+    all_cols = featurized_data[off_cols+def_cols]
 
-    data_norm = normalize(defensive, axis=0)
 
-    for i in [4]:
+
+    data_norm_off = normalize(offensive, axis=0)
+
+    k_vals = [5]
+    inertia_list = []
+    for i in k_vals:
         KMeans_test = KMeans(n_clusters=i, init='k-means++', n_init=10, max_iter=300, tol=0.0001, \
             precompute_distances='auto', verbose=0, random_state=None, copy_x=True, n_jobs=1, algorithm='auto')
-        KMeans_test.fit(data_norm)
+        KMeans_test.fit(data_norm_off)
         test_labels = KMeans_test.labels_
-        player_info['cluster'] = test_labels
-            # test_players.to_csv('~/capstone_project/data/cluster_test.csv')
-        # test_players[test_players['cluster'] == 10]
-            # silhouette_analysis(test)
-        s_score = silhouette_score(data_norm, test_labels, metric='euclidean',sample_size=None)
-        print('k_val: ',i)
-        print('s_score: ',s_score)
-        print('inertia: ',KMeans_test.inertia_)
-        print
+        player_info_off['cluster'] = test_labels
+
+    clusters = player_info_off.cluster.unique()
+    for clus in clusters:
+        player_info_off[clus] = clus
+
+    for i in range(player_info_off.shape[0]):
+        for c in clusters:
+            player_info_off[c].iloc[i] = 1 if c == player_info_off['cluster'].iloc[i] else 0
+
+
+
+
+
+
+
+        # # test_players.to_csv('~/capstone_project/data/cluster_test.csv')
+
+    #     s_score = silhouette_score(data_norm_off, test_labels, metric='euclidean',sample_size=None)
+    #     inertia_list.append(KMeans_test.inertia_)
+    #     print('k_val: ',i)
+    #     print('s_score: ',s_score)
+    #     print('inertia: ',KMeans_test.inertia_)
+    #
+    # plt.plot(k_vals, inertia_list)
+    # plt.xlabel('k')
+    # plt.ylabel('sum of error')
+    # plt.show()
