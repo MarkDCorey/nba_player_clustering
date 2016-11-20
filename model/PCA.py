@@ -1,69 +1,72 @@
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import scale,normalize,StandardScaler
 from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
 
 featurized_data = pd.read_csv('~/capstone_project/data/featurized_data.csv')
-test = featurized_data[featurized_data.min_game >10]
-test_players = test[['player_id','display_name']]
-test.drop(['Unnamed: 0','player_id','display_name','mi_def_min','mi_off_min','pass_min','season_exp','min_game','min_tot'], inplace = True, axis = 1)
-features = test.columns
-test_players.set_index('player_id',inplace = True, drop = True)
-test.fillna(0, inplace = True)
-test = normalize(test)
+player_mat = featurized_data[featurized_data.min_tot >2000]
+player_info_off = player_mat[['player_id','display_name']]
+player_info_def= player_mat[['player_id','display_name']]
+player_mat.drop(['Unnamed: 0','player_id','display_name','mi_def_min','mi_off_min','pass_min','season_exp','min_game','min_tot'], inplace = True, axis = 1)
 
 
-# # X = df.as_matrix() #take data out of dataframe
-# X = scale(X) #standardize the data before giving it to the PCA.
-# #I standardize the data because some features such as PF or steals have lower magnitudes than other features such as FG2A
-# #I want both to contribute equally to the PCA, so I make sure they're on the same scale.
+shooting_cols = ['attempt_at_rim_2_min', 'attempt_cut_run_2_min',
+                'attempt_drive_2_min', 'attempt_jumper_2_min',
+                'attempt_jumper_3_min', 'attempt_off_dribble_2_min',
+                'attempt_off_dribble_3_min', 'attempt_post_2_min', 'eff_at_rim_2',
+                'eff_cut_run_2', 'eff_drive_2', 'eff_jumper_2', 'eff_jumper_3',
+                'eff_off_dribble_2', 'eff_off_dribble_3', 'eff_post_2', 'ast_min',
+                'oreb_min', 'fta_min', 'tov_min','eff_ft', 'ast_tov', 'c_oreb_min']
 
-# pca = PCA(n_components=8) #great PCA object
-# pca.fit(test) #pull out principle components
-# var_expl = pca.explained_variance_ratio_ #find amount of variance explained by each component
-# tot_var_expl = np.array([sum(var_expl[0:i+1]) for i,x in enumerate(var_expl)]) #create vector with cumulative variance
-#
-# plt.figure(figsize=(12,4)) #create cumulative proportion of variance plot
-# plt.subplot(1,2,1)
-# plt.plot(range(1,len(tot_var_expl)+1), tot_var_expl*100,'o-')
-# plt.axis([0, len(tot_var_expl)+1, 0, 100])
-# plt.xlabel('Number of PCA Components Included')
-# plt.ylabel('Percentage of variance explained (%)')
-#
-# plt.subplot(1,2,2) #create scree plot
-# plt.plot(range(1,len(var_expl)+1), var_expl*100,'o-')
-# plt.axis([0, len(var_expl)+1, 0, 100])
-# plt.xlabel('PCA Component');
+def_cols = ['blk_min', 'blk_a_min','dreb_min','stl_min','c_dreb_min','d_fga_paint_min', 'd_fga_perim_min',
+    'd_fga_mid_min','d_fga_threes_min', 'd_eff_paint', 'd_eff_perim', 'd_eff_mid','d_eff_threes']
 
 
-reduced_data = PCA(n_components=14, whiten=False).fit_transform(test)
+off_cols = ['attempt_at_rim_2_min', 'attempt_cut_run_2_min',
+                'attempt_drive_2_min', 'attempt_jumper_2_min',
+                'attempt_jumper_3_min', 'attempt_off_dribble_2_min',
+                'attempt_off_dribble_3_min', 'attempt_post_2_min', 'eff_at_rim_2',
+                'eff_cut_run_2', 'eff_drive_2', 'eff_jumper_2', 'eff_jumper_3',
+                'eff_off_dribble_2', 'eff_off_dribble_3', 'eff_post_2']
+
+
+#create two feature mats
+player_mat_off = player_mat[off_cols]
+player_info_off.set_index(player_info_off.player_id,inplace = True, drop = True)
+features_off = player_mat_off.columns
+
+player_mat_def = player_mat[def_cols]
+player_info_def.set_index(player_info_def.player_id,inplace = True, drop = True)
+features_def = player_mat_def.columns
+
+
+#prep each for algos
+player_mat_off.fillna(0, inplace = True)
+player_mat_off = scale(player_mat_off)
+
+player_mat_def.fillna(0, inplace = True)
+player_mat_def = scale(player_mat_def)
+
+
+
+reduced_data = PCA(n_components=10, whiten=True).fit_transform(player_mat_off)
+# reduced_data = normalize(reduced_data)
 
 scores = []
 
-k_vals = [6,8,9,10,11,12,13,14,15]
+# k_vals = [6,8,9,10,11,12,13,14,15]
 
+kmeans = KMeans(n_clusters=7, init='k-means++', n_init=10, max_iter=300, tol=0.0001, \
+        precompute_distances='auto', verbose=0, random_state=None, copy_x=True, n_jobs=1, algorithm='auto')
+kmeans.fit(reduced_data)
+labels = kmeans.labels_
+s_score = silhouette_score(reduced_data, labels, metric='euclidean',sample_size=None)
 
-# for j in xrange(10):
-KMeans_test = KMeans(n_clusters=5, init='k-means++', n_init=10, max_iter=300, tol=0.0001, \
-precompute_distances='auto', verbose=0, random_state=None, copy_x=True, n_jobs=1, algorithm='auto')
-KMeans_test.fit(reduced_data)
-test_labels = KMeans_test.labels_
-#     players_clustered = pd.DataFrame(players_by_topic)
-#     players_clustered['cluster'] = test_labels
-#     players_clustered['player_name'] = player_info['display_name']
-#     players_clustered['player_id'] = player_info['player_id']
-#     s_score = silhouette_score(players_by_topic, test_labels, metric='euclidean',sample_size=None)
-#
-#         # inertia_list.append(KMeans_test.inertia_)
-#         # print 'n_comp: ',i
-#         # print 'k_val: ',j
-#         # print 's_score: ',s_score
-#         # print 'inertia: ',KMeans_test.inertia_
-#
-#     temp = {'n_comp':i,'k_val':j,'avg_inertia':KMeans_test.inertia_/j,'s_score':s_score}
-#     scores.append(temp)
-#
-# score_df = pd.DataFrame(scores)
+labels_df = pd.DataFrame(labels)
+c_counts = labels_df[0].value_counts()
+c_dist = [round(clust/float(sum(c_counts)),2) for clust in c_counts]
+player_info_off['cluster'] = labels

@@ -17,22 +17,6 @@ import matplotlib.cm as cm
 
 
 
-
-
-# #look for interpretability in the clusters.
-# #ideally there is significant separation (eg standard dev from average of player set) on a subset of features
-# #either use these features to define the cluster labels, or come up with own
-#
-# print "cluster centers:"
-# print kmeans.cluster_centers_
-#
-# top_centroids = kmeans.cluster_centers_.argsort()[:,-1:-11:-1]
-# print "top features for each cluster:"
-# for num, centroid in enumerate(top_centroids):
-#     print "%d: %s" % (num, ", ".join(features[i] for i in centroid))
-
-
-#dim reduction?
 # the t-SNE dimensionality reduction algorithm?
 
 
@@ -152,13 +136,13 @@ if __name__ == '__main__':
     featurized_data = pd.read_csv('~/capstone_project/data/featurized_data.csv')
     test = featurized_data[featurized_data.min_tot > 800]
     test_players = test[['player_id','display_name']]
-    test.drop(['Unnamed: 0','player_id','display_name','mi_def_min','mi_off_min','pass_min','season_exp','min_game','min_tot'], inplace = True, axis = 1)
+    test.drop(['Unnamed: 0','player_id','display_name','min_tot'], inplace = True, axis = 1)
     #,'age','height','weight','season_exp','min_game'
     test.fillna(0, inplace = True)
     test = normalize(test)
-    k_vals = [2,4,6,8,10,12,14,16]
+    k_vals = [6,8,10,12,14,16,18,20]
     inertia_list = []
-    for i in [10]:
+    for i in k_vals:
         KMeans_test = KMeans(n_clusters=i, init='k-means++', n_init=10, max_iter=300, tol=0.0001, \
         precompute_distances='auto', verbose=0, random_state=None, copy_x=True, n_jobs=1, algorithm='auto')
         KMeans_test.fit_transform(test)
@@ -169,10 +153,10 @@ if __name__ == '__main__':
         inertia_list.append(KMeans_test.inertia_)
         print('k_val: ',i)
         print('s_score: ',s_score)
-        print('avg_cluster_inertia: ',KMeans_test.inertia_/i)
+        print('total_inertia: ',KMeans_test.inertia_)
 
-    # plt.plot(k_vals, inertia_list)
-    # plt.xlabel('k')
-    # plt.ylabel('sum of error')
-    # plt.show()
+    plt.plot(k_vals, inertia_list)
+    plt.xlabel('k')
+    plt.ylabel('sum of error')
+    plt.show()
     # test_players.to_csv('~/capstone_project/data/cluster_test.csv')

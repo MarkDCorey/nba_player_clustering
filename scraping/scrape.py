@@ -82,6 +82,48 @@ def generate_player_summary_df(player_id_list):
 
     return player_summary_df
 
+def generate_player_shot_loc_df(player_id_list,year):
+    lst_of_dicts = []
+
+    for id in player_id_list:
+        print id
+        #get the shotchart for player
+        shot_loc= player.PlayerShootingSplits(id, season = year).shot_areas()
+        if not shot_loc.empty:
+            attempt_RA = shot_loc.FGA[shot_loc.GROUP_VALUE == 'Restricted Area'].sum()
+            made_RA = shot_loc.FGM[shot_loc.GROUP_VALUE == 'Restricted Area'].sum()
+
+            attempt_paint = shot_loc.FGA[shot_loc.GROUP_VALUE == 'In The Paint (Non-RA)'].sum()
+            made_paint = shot_loc.FGM[shot_loc.GROUP_VALUE == 'In The Paint (Non-RA)'].sum()
+
+            attempt_mid = shot_loc.FGA[shot_loc.GROUP_VALUE == 'Mid-Range'].sum()
+            made_mid = shot_loc.FGM[shot_loc.GROUP_VALUE == 'Mid-Range'].sum()
+
+            attempt_corner_3 = (shot_loc.FGA[shot_loc.GROUP_VALUE == 'Left Corner 3'].sum()) + \
+                (shot_loc.FGA[shot_loc.GROUP_VALUE == 'Right Corner 3'].sum())
+            made_corner_3 = (shot_loc.FGM[shot_loc.GROUP_VALUE == 'Left Corner 3'].sum()) + \
+                (shot_loc.FGM[shot_loc.GROUP_VALUE == 'Right Corner 3'].sum())
+
+            attempt_non_corner_3 = (shot_loc.FGA[shot_loc.GROUP_VALUE == 'Above the Break 3'].sum()) + \
+                (shot_loc.FGA[shot_loc.GROUP_VALUE == 'Backcourt'].sum())
+            made_non_corner_3 = (shot_loc.FGM[shot_loc.GROUP_VALUE == 'Above the Break 3'].sum()) + \
+                (shot_loc.FGM[shot_loc.GROUP_VALUE == 'Backcourt'].sum())
+
+            lst_of_dicts.append({'player_id':str(id),'attempt_RA':attempt_RA,'made_RA':made_RA,
+                                                     'attempt_paint':attempt_paint,'made_paint':made_paint,
+                                                     'attempt_corner_3':attempt_corner_3,'made_corner_3':made_corner_3,
+                                                     'attempt_non_corner_3':attempt_non_corner_3,'made_non_corner_3':made_non_corner_3,
+                                                     'attempt_mid':attempt_mid,'made_mid':made_mid})
+
+        else:
+            lst_of_dicts.append({'player_id':str(id),'attempt_RA':0,'made_RA':0,
+                                                     'attempt_paint':0,'made_paint':0,
+                                                     'attempt_corner_3':0,'made_corner_3':0,
+                                                     'attempt_non_corner_3':0,'made_non_corner_3':0,
+                                                     'attempt_mid':0,'made_mid':0})
+    player_shot_loc_df = pd.DataFrame(lst_of_dicts)
+    player_shot_loc_df.set_index('player_id',inplace = True, drop=True)
+    return player_shot_loc_df
 
 def generate_player_shot_df(player_id_list,year):
     lst_of_dicts = []
@@ -450,15 +492,19 @@ def generate_defense_df(player_id_lst,year):
 
             d_fgm_paint = float(player_defense.D_FGM[player_defense.DEFENSE_CATEGORY == 'Less Than 6 Ft'])
             d_fga_paint = float(player_defense.D_FGA[player_defense.DEFENSE_CATEGORY == 'Less Than 6 Ft'])
+            d_freq_paint = float(player_defense.FREQ[player_defense.DEFENSE_CATEGORY == 'Less Than 6 Ft'])
 
             d_fgm_perim = float(player_defense.D_FGM[player_defense.DEFENSE_CATEGORY == 'Greater Than 15 Ft'])
             d_fga_perim = float(player_defense.D_FGA[player_defense.DEFENSE_CATEGORY == 'Greater Than 15 Ft'])
+            d_freq_perim = float(player_defense.FREQ[player_defense.DEFENSE_CATEGORY == 'Greater Than 15 Ft'])
 
             d_fgm_mid = d_fgm_overall - d_fgm_perim - d_fgm_paint
             d_fga_mid = d_fga_overall - d_fga_perim - d_fga_paint
+            d_freq_mid = 1 - d_freq_perim - d_freq_paint
 
             d_fgm_threes = float(player_defense.D_FGM[player_defense.DEFENSE_CATEGORY == '3 Pointers'])
             d_fga_threes = float(player_defense.D_FGA[player_defense.DEFENSE_CATEGORY == '3 Pointers'])
+            d_freq_threes = float(player_defense.FREQ[player_defense.DEFENSE_CATEGORY == '3 Pointers'])
 
 
             lst_of_dicts.append({'player_id':str(id),
@@ -467,6 +513,8 @@ def generate_defense_df(player_id_lst,year):
                         'd_fgm_mid':d_fgm_mid,'d_fga_mid':d_fga_mid,
                         'd_fgm_perim':d_fgm_perim,'d_fga_perim':d_fga_perim,
                         'd_fgm_threes':d_fgm_threes,'d_fga_threes':d_fga_threes,
+                        'd_freq_paint': d_freq_paint,'d_freq_perim':d_freq_perim,
+                        'd_freq_mid':d_freq_mid,'d_freq_threes':d_freq_threes
                         })
             # time.sleep(1)
 
@@ -477,7 +525,8 @@ def generate_defense_df(player_id_lst,year):
                         'd_fgm_mid':0,'d_fga_mid':0,
                         'd_fgm_perim':0,'d_fga_perim':0,
                         'd_fgm_threes':0,'d_fga_threes':0,
-
+                        'd_freq_paint': 0,'d_freq_perim':0,
+                        'd_freq_mid':0,'d_freq_threes':0
                         })
 
 
@@ -506,37 +555,91 @@ def generate_pass_df(player_id_lst, year):
     return pass_df
 
 
+def generate_ast_shot_df(player_id_list,year):
+    lst_of_dicts = []
+
+    for id in player_id_list:
+        print id
+        #get the shotchart for player
+        ast_shots = player.PlayerShootingSplits(id, season = year).assisted_shots()
+        if not ast_shots.empty:
+            ast_shots_made = ast_shots.FGM[ast_shots.GROUP_VALUE == 'Assisted'].sum()
+
+            lst_of_dicts.append({'player_id':str(id),'ast_shot_made':ast_shots_made})
+
+        else:
+            lst_of_dicts.append({'player_id':str(id),'ast_shot_made':0})
+
+    ast_shot_df = pd.DataFrame(lst_of_dicts)
+    ast_shot_df.set_index('player_id',inplace = True, drop=True)
+    return ast_shot_df
+
+def generate_posessions_df(lineups):
+    lineup_ids = []
+    for i in xrange(lineups.shape[0]):
+        lineup = lineups['lineup_ids'].iloc[i].replace(' ','').split('-')
+        lineup = [int(x) for x in lineup]
+        lineup.sort()
+        lineup_ids.append(lineup)
+    lineups['lineup_ids'] = lineup_ids
+    lineups.drop('Unnamed: 0', inplace = True, axis = 1)
+
+    lst_of_dicts = []
+    for i in xrange(lineups.shape[0]):
+        for id in lineups['lineup_ids'].iloc[i]:
+            temp = {'id':id,
+                    'FGA_l':float(lineups['FGA_l'].iloc[i]),
+                    'FTA_l':float(lineups['FTA_l'].iloc[i]),
+                    'OREB_l':float(lineups['OREB_l'].iloc[i]),
+                    'TOV_l':float(lineups['TOV_l'].iloc[i])}
+            lst_of_dicts.append(temp)
+
+    pos_df = pd.DataFrame(lst_of_dicts)
+    pos_df = pos_df.groupby(pos_df.id).sum()
+    pos_df['pos'] = pos_df.FGA_l + (0.44 * pos_df.FTA_l) - pos_df.OREB_l + pos_df.TOV_l
+    pos_df.drop(['FGA_l','FTA_l','OREB_l','TOV_l'], inplace = True, axis = 1)
+
+    return pos_df
+
 
 
 
 if __name__ == '__main__':
-    year = '2014-15'
+    year = '2015-16'
     #create ordered list of player ids
     print 'Get player_ids'
-    player_ids = get_player_ids(year = '2014-15')
+    player_ids = get_player_ids(year = '2015-16')
     # player_ids = player_ids[:3]
+    lineups_2015_16 = pd.read_csv('~/capstone_project/data/lineup_data_2015_16.csv')
+
 
     #clean and munge
+    print 'Create pos_df'
+    pos_df = generate_posessions_df(lineups_2015_16)
+    print 'Create defense_df'
+    defense_df = generate_defense_df(player_ids, year)
     print 'Create summary_df'
     summary_df = generate_player_summary_df(player_ids)
     print 'Create shot_df'
     shot_df = generate_player_shot_df(player_ids,year)
-    print 'Create catch_shoot_df'
-    catch_shoot_df = generate_catch_shoot_df(player_ids, year)
+    print 'Create shot_loc_df'
+    player_shot_loc_df = generate_player_shot_loc_df(player_ids, year)
+    # print 'Create catch_shoot_df'
+    # catch_shoot_df = generate_catch_shoot_df(player_ids, year)
     print 'Create overalls_df'
     overalls_df = generate_overalls_df(player_ids,year)
     print 'Create rebounding_df'
     rebounding_df = generate_rebounding_df(player_ids,year)
-    print 'Create speed_dist_df'
-    speed_dist_df = generate_speed_dist_df(player_ids, year)
-    print 'Create defense_df'
-    defense_df = generate_defense_df(player_ids, year)
-    print 'Create pass_df'
-    pass_df = generate_pass_df(player_ids, year)
+    # print 'Create speed_dist_df'
+    # speed_dist_df = generate_speed_dist_df(player_ids, year)
+    # print 'Create pass_df'
+    # pass_df = generate_pass_df(player_ids, year)
+    print 'Create ast_shot_df'
+    ast_shot_df = generate_ast_shot_df(player_ids, year)
 
     #create master df
-    merged_df = pd.concat([summary_df, shot_df, catch_shoot_df, overalls_df, \
-        rebounding_df, speed_dist_df, defense_df, pass_df], axis=1)
+    merged_df = pd.concat([summary_df, shot_df, player_shot_loc_df, overalls_df, \
+        rebounding_df, defense_df, ast_shot_df,pos_df], axis=1)
 
     #store df in csv
-    merged_df.to_csv('~/capstone_project/data/aggregated_player_data_14_15.csv')
+    merged_df.to_csv('~/capstone_project/data/aggregated_player_data_15_16.csv')
