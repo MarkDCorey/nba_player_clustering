@@ -587,7 +587,7 @@ def generate_posessions_df(lineups):
     lst_of_dicts = []
     for i in xrange(lineups.shape[0]):
         for id in lineups['lineup_ids'].iloc[i]:
-            temp = {'id':id,
+            temp = {'player_id':id,
                     'FGA_l':float(lineups['FGA_l'].iloc[i]),
                     'FTA_l':float(lineups['FTA_l'].iloc[i]),
                     'OREB_l':float(lineups['OREB_l'].iloc[i]),
@@ -595,9 +595,10 @@ def generate_posessions_df(lineups):
             lst_of_dicts.append(temp)
 
     pos_df = pd.DataFrame(lst_of_dicts)
-    pos_df = pos_df.groupby(pos_df.id).sum()
+    pos_df = pos_df.groupby(pos_df.player_id).sum()
     pos_df['pos'] = pos_df.FGA_l + (0.44 * pos_df.FTA_l) - pos_df.OREB_l + pos_df.TOV_l
     pos_df.drop(['FGA_l','FTA_l','OREB_l','TOV_l'], inplace = True, axis = 1)
+    pos_df.index = pos_df.index.map(str)
 
     return pos_df
 
@@ -605,23 +606,23 @@ def generate_posessions_df(lineups):
 
 
 if __name__ == '__main__':
-    year = '2015-16'
+    year = '2013-14'
     #create ordered list of player ids
     print 'Get player_ids'
-    player_ids = get_player_ids(year = '2015-16')
+    player_ids = get_player_ids(year = '2013-14')
     # player_ids = player_ids[:3]
-    lineups_2015_16 = pd.read_csv('~/capstone_project/data/lineup_data_2015_16.csv')
+    lineups_2013_14 = pd.read_csv('~/capstone_project/data/lineup_data_2013_14.csv')
 
 
     #clean and munge
+    print 'Create shot_df'
+    shot_df = generate_player_shot_df(player_ids,year)
     print 'Create pos_df'
-    pos_df = generate_posessions_df(lineups_2015_16)
+    pos_df = generate_posessions_df(lineups_2013_14)
     print 'Create defense_df'
     defense_df = generate_defense_df(player_ids, year)
     print 'Create summary_df'
     summary_df = generate_player_summary_df(player_ids)
-    print 'Create shot_df'
-    shot_df = generate_player_shot_df(player_ids,year)
     print 'Create shot_loc_df'
     player_shot_loc_df = generate_player_shot_loc_df(player_ids, year)
     # print 'Create catch_shoot_df'
@@ -639,7 +640,9 @@ if __name__ == '__main__':
 
     #create master df
     merged_df = pd.concat([summary_df, shot_df, player_shot_loc_df, overalls_df, \
-        rebounding_df, defense_df, ast_shot_df,pos_df], axis=1)
+        rebounding_df, defense_df, ast_shot_df], axis=1)
+
+    merged_df = merged_df.merge(pos_df,how = 'left',left_index = True, right_index = True, sort = True)
 
     #store df in csv
-    merged_df.to_csv('~/capstone_project/data/aggregated_player_data_15_16.csv')
+    merged_df.to_csv('~/capstone_project/data/aggregated_player_data_13_14.csv')

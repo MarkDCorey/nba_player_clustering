@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from cluster_overlay import *
+# from cluster_overlay import *
 
 '''
 INPUT: the featurized matrix used by model and the player cluster labels
@@ -10,13 +10,19 @@ OUTPUT: descriptions of each cluster - ranked features that define the cluster
 
 
 
-
-def get_feature_stats(feat_mat):
+def get_feature_stats(feat_mat, minimum_min =500):
 
     '''
-    get stats for each feature
+    Gets mean and standard deviation for each feature
+
+    INPUT: the feature matrix used to build the model, minimum number of minutes for each
+            player included in analysis
+
+    OUTPUT: a df of the STD and mean for each feature
     '''
-    feat_mat_clean = feat_mat.iloc[:,4:]
+
+    feat_mat = feat_mat[feat_mat['min_tot'] > minimum_min]
+    feat_mat_clean = feat_mat.drop(['player_id','display_name','min_tot','gp'], axis = 1)
     #for each feature get the mean and the standard deviation, add to df
     lst_of_dicts = []
     for feature in list(feat_mat_clean.columns):
@@ -59,49 +65,23 @@ def cluster_rank_features(cf_analysis_df, cluster):
 
 
 
-# player_clusters['cluster'][player_clusters['player_id'] == player_id]
-# for cluster in
-
-
-
-
-
 if __name__ == '__main__':
-    FILE_FEATURES = 'data/featurized_data.csv'
-    FILE_LINEUPS = '~/capstone_project/data/lineup_data.csv'
-    FILE_CLUSTERS = '~/capstone_project/data/cluster_test.csv'
     #read in feature mat, the player clusters, and the linups
-    featurized_mat = pd.read_csv(FILE_FEATURES)
-    lineups = pd.read_csv(FILE_LINEUPS)
-    player_clusters = pd.read_csv(FILE_CLUSTERS)
+    featurized_mat = pd.read_csv('~/capstone_project/data/featurized_data.csv')
+    player_clusters = pd.read_csv('~/capstone_project/data/h_clusters_2015_16.csv')
 
+    #get feature stats
+    feature_stats = get_feature_stats(featurized_mat, minimum_min =500)
 
-    #reduce the size of feat mat to match that of clusters
-    ####
-    minutes_min = 10
-    ####
-
-    featurized_mat = featurized_mat[featurized_mat.min_tot > minutes_min]
-
-    #generate feature stats
-    feature_stats = get_feature_stats(featurized_mat)
-
-    #concat feats_players and clusters
+    #concat feature matrix with clusters
     featurized_mat.set_index('player_id', inplace=True, drop = True)
     player_clusters.set_index('player_id', inplace = True, drop = True)
-    feats_clusters = pd.concat([featurized_mat, player_clusters], axis=1)
+    features_clusters = player_clusters.merge(featurized_mat,how = 'left',left_index = True, right_index = True, sort = True)
 
+    cluster_feat_df = cluster_feat_analyis(feature_stats, features_clusters)
 
-    cluster_feat_df = cluster_feat_analyis(feature_stats, feats_clusters)
-
-    for i in range(10):
+    for i in range(16):
         test = cluster_rank_features(cluster_feat_df, i)
         print'Cluster: ',i
-        print'Top 10: ',test[['feature','std_from_avg']][:10]
+        print'Features: ',test[['feature','std_from_avg']]
         print ''
-
-    #append clusters to
-
-    # #
-    # feats_and_clusters = add_clusters_to_lineups(lineups, player_clusters)
-    # aggregate_clusters(feats_and_clusters)

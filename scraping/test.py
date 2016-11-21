@@ -158,4 +158,6 @@ player_data.set_index('player_id', inplace = True, drop = True)
 
 pos_df = generate_posessions_df(lineups_2015_16)
 
-merged_df = pd.concat([pos_df, player_data], axis=1)
+
+
+merged_df = player_data.merge(pos_df,how = 'left',left_index = True, right_index = True, sort = True)
