@@ -9,7 +9,7 @@ def get_team_ids():
         team_ids.append(constants.TEAMS[team_id]['id'])
     return team_ids
 
-def get_lineups(team_id_lst,season = '2013-14'):
+def get_lineups(team_id_lst,season = '2016-17'):
     lst_of_dicts = []
     for i in team_id_lst:
         team_lineups = team.TeamLineups(team_id = i, season = season).lineups()
@@ -40,7 +40,7 @@ def get_lineups(team_id_lst,season = '2013-14'):
 
 
 if __name__ == '__main__':
-    year = '2013-14'
+    year = '2016-17'
     team_ids = get_team_ids()
     lineups_df = get_lineups(team_ids, season=year)
-    lineups_df.to_csv('~/capstone_project/data/lineup_data_2013_14.csv')
+    lineups_df.to_csv('~/capstone_project/data/lineup_data_2016_17.csv')

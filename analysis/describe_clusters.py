@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 # from cluster_overlay import *
+from pprint import pprint
+
 
 '''
 INPUT: the featurized matrix used by model and the player cluster labels
@@ -82,6 +84,9 @@ if __name__ == '__main__':
 
     for i in range(16):
         test = cluster_rank_features(cluster_feat_df, i)
-        print'Cluster: ',i
-        print'Features: ',test[['feature','std_from_avg']]
-        print ''
+        print '    Cluster:',i
+        pprint(test)
+        print
+        # pprint('Cluster: ',{}).format(i)
+        # pprint('Features: ',test[['feature','std_from_avg']])
+        # pprint('')

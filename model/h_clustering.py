@@ -23,7 +23,7 @@ c,coph_dists = cophenet(Z, pdist(player_mat))
 #
 # # getting clusters...
 max_d = 100
-k=9
+k=13
 clusters = fcluster(Z, k, criterion='maxclust')
 # clusters = fcluster(Z, max_d, criterion='distance')
 clusters
