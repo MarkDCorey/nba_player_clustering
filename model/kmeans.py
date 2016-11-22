@@ -134,13 +134,13 @@ def plot_k_sse(X, min_k, max_k):
 if __name__ == '__main__':
     #read in the aggregated/saved data into a df
     featurized_data = pd.read_csv('~/capstone_project/data/featurized_data.csv')
-    test = featurized_data[featurized_data.min_tot > 800]
+    test = featurized_data[featurized_data.min_tot > 500]
     test_players = test[['player_id','display_name']]
-    test.drop(['Unnamed: 0','player_id','display_name','min_tot'], inplace = True, axis = 1)
+    test.drop(['player_id','display_name','min_tot','gp'], inplace = True, axis = 1)
     #,'age','height','weight','season_exp','min_game'
     test.fillna(0, inplace = True)
-    test = normalize(test)
-    k_vals = [6,8,10,12,14,16,18,20]
+    test = scale(test)
+    k_vals = [11]
     inertia_list = []
     for i in k_vals:
         KMeans_test = KMeans(n_clusters=i, init='k-means++', n_init=10, max_iter=300, tol=0.0001, \

@@ -5,13 +5,8 @@ from datetime import datetime
 import time
 
 '''
-1) generate a list of active players
-2) scrape summary and performance information and merge into single df
-3) store the data in a csv so it can be accessed directly by the model
-
-# shot_type volume (eg attempts of shot_type per min) and efficiency.
-# may need to impute 0 of N/A (if acceptable) for efficiency metric if volume is below a certain threshold
-
+uses python client to pull in raw data from various siloed APIs on NBA_Stats.com
+merges data by season and persists 
 '''
 
 #get a list of the player ids for a given season
@@ -88,26 +83,28 @@ def generate_player_shot_loc_df(player_id_list,year):
     for id in player_id_list:
         print id
         #get the shotchart for player
-        shot_loc= player.PlayerShootingSplits(id, season = year).shot_areas()
-        if not shot_loc.empty:
-            attempt_RA = shot_loc.FGA[shot_loc.GROUP_VALUE == 'Restricted Area'].sum()
-            made_RA = shot_loc.FGM[shot_loc.GROUP_VALUE == 'Restricted Area'].sum()
+        shot_chart = shotchart.ShotChart(id, season = year).shot_chart()
+        shots = shot_chart[['SHOT_ZONE_BASIC','SHOT_ATTEMPTED_FLAG','SHOT_MADE_FLAG']].groupby('SHOT_ZONE_BASIC').sum()
+        shots.reset_index(inplace = True)
+        if not shots.empty:
+            attempt_RA = shots.SHOT_ATTEMPTED_FLAG[shots.SHOT_ZONE_BASIC == 'Restricted Area'].sum()
+            made_RA = shots.SHOT_MADE_FLAG[shots.SHOT_ZONE_BASIC == 'Restricted Area'].sum()
 
-            attempt_paint = shot_loc.FGA[shot_loc.GROUP_VALUE == 'In The Paint (Non-RA)'].sum()
-            made_paint = shot_loc.FGM[shot_loc.GROUP_VALUE == 'In The Paint (Non-RA)'].sum()
+            attempt_paint = shots.SHOT_ATTEMPTED_FLAG[shots.SHOT_ZONE_BASIC == 'In The Paint (Non-RA)'].sum()
+            made_paint = shots.SHOT_MADE_FLAG[shots.SHOT_ZONE_BASIC == 'In The Paint (Non-RA)'].sum()
 
-            attempt_mid = shot_loc.FGA[shot_loc.GROUP_VALUE == 'Mid-Range'].sum()
-            made_mid = shot_loc.FGM[shot_loc.GROUP_VALUE == 'Mid-Range'].sum()
+            attempt_mid = shots.SHOT_ATTEMPTED_FLAG[shots.SHOT_ZONE_BASIC == 'Mid-Range'].sum()
+            made_mid = shots.SHOT_MADE_FLAG[shots.SHOT_ZONE_BASIC == 'Mid-Range'].sum()
 
-            attempt_corner_3 = (shot_loc.FGA[shot_loc.GROUP_VALUE == 'Left Corner 3'].sum()) + \
-                (shot_loc.FGA[shot_loc.GROUP_VALUE == 'Right Corner 3'].sum())
-            made_corner_3 = (shot_loc.FGM[shot_loc.GROUP_VALUE == 'Left Corner 3'].sum()) + \
-                (shot_loc.FGM[shot_loc.GROUP_VALUE == 'Right Corner 3'].sum())
+            attempt_corner_3 = (shots.SHOT_ATTEMPTED_FLAG[shots.SHOT_ZONE_BASIC == 'Left Corner 3'].sum()) + \
+                (shots.SHOT_ATTEMPTED_FLAG[shots.SHOT_ZONE_BASIC == 'Right Corner 3'].sum())
+            made_corner_3 = (shots.SHOT_MADE_FLAG[shots.SHOT_ZONE_BASIC == 'Left Corner 3'].sum()) + \
+                (shots.SHOT_MADE_FLAG[shots.SHOT_ZONE_BASIC == 'Right Corner 3'].sum())
 
-            attempt_non_corner_3 = (shot_loc.FGA[shot_loc.GROUP_VALUE == 'Above the Break 3'].sum()) + \
-                (shot_loc.FGA[shot_loc.GROUP_VALUE == 'Backcourt'].sum())
-            made_non_corner_3 = (shot_loc.FGM[shot_loc.GROUP_VALUE == 'Above the Break 3'].sum()) + \
-                (shot_loc.FGM[shot_loc.GROUP_VALUE == 'Backcourt'].sum())
+            attempt_non_corner_3 = (shots.SHOT_ATTEMPTED_FLAG[shots.SHOT_ZONE_BASIC == 'Above the Break 3'].sum()) + \
+                (shots.SHOT_ATTEMPTED_FLAG[shots.SHOT_ZONE_BASIC == 'Backcourt'].sum())
+            made_non_corner_3 = (shots.SHOT_MADE_FLAG[shots.SHOT_ZONE_BASIC == 'Above the Break 3'].sum()) + \
+                (shots.SHOT_MADE_FLAG[shots.SHOT_ZONE_BASIC == 'Backcourt'].sum())
 
             lst_of_dicts.append({'player_id':str(id),'attempt_RA':attempt_RA,'made_RA':made_RA,
                                                      'attempt_paint':attempt_paint,'made_paint':made_paint,
@@ -602,7 +599,23 @@ def generate_posessions_df(lineups):
 
     return pos_df
 
+def generate_reb_pos_df(player_id_list,year):
+    lst_of_dicts = []
 
+    for id in player_id_list:
+        print id
+        stats = player.PlayerGeneralSplits(player_id = id, per_mode='PerPossession', season = year).overall()
+        dreb_pos = stats['DREB'].sum()
+        oreb_pos = stats['OREB'].sum()
+
+        temp_dict = {'player_id': str(id),
+                'dreb_pos':float(dreb_pos),'oreb_pos':float(oreb_pos)}
+
+        lst_of_dicts.append(temp_dict)
+
+    reb_pos_df = pd.DataFrame(lst_of_dicts)
+    reb_pos_df.set_index('player_id',inplace = True, drop=True)
+    return reb_pos_df
 
 
 if __name__ == '__main__':
@@ -617,8 +630,8 @@ if __name__ == '__main__':
     #clean and munge
     print 'Create shot_loc_df'
     player_shot_loc_df = generate_player_shot_loc_df(player_ids, year)
-    print 'Create shot_df'
-    shot_df = generate_player_shot_df(player_ids,year)
+    # print 'Create shot_df'
+    # shot_df = generate_player_shot_df(player_ids,year)
     print 'Create pos_df'
     pos_df = generate_posessions_df(lineups)
     print 'Create defense_df'
@@ -629,20 +642,22 @@ if __name__ == '__main__':
     # catch_shoot_df = generate_catch_shoot_df(player_ids, year)
     print 'Create overalls_df'
     overalls_df = generate_overalls_df(player_ids,year)
-    print 'Create rebounding_df'
-    rebounding_df = generate_rebounding_df(player_ids,year)
+    # print 'Create rebounding_df'
+    # rebounding_df = generate_rebounding_df(player_ids,year)
+    print 'Create reb_pos_df'
+    reb_pos_df = generate_reb_pos_df(player_ids,year)
     # print 'Create speed_dist_df'
     # speed_dist_df = generate_speed_dist_df(player_ids, year)
     # print 'Create pass_df'
     # pass_df = generate_pass_df(player_ids, year)
-    print 'Create ast_shot_df'
-    ast_shot_df = generate_ast_shot_df(player_ids, year)
+    # print 'Create ast_shot_df'
+    # ast_shot_df = generate_ast_shot_df(player_ids, year)
 
     #create master df
-    merged_df = pd.concat([summary_df, shot_df, player_shot_loc_df, overalls_df, \
-        rebounding_df, defense_df, ast_shot_df], axis=1)
+    merged_df = pd.concat([summary_df, player_shot_loc_df, overalls_df, \
+        defense_df, reb_pos_df], axis=1)
 
     merged_df = merged_df.merge(pos_df,how = 'left',left_index = True, right_index = True, sort = True)
 
     #store df in csv
-    merged_df.to_csv('~/capstone_project/data/aggregated_player_data_16_17.csv')
+    merged_df.to_csv('~/capstone_project/data/raw_player_data_16_17.csv')

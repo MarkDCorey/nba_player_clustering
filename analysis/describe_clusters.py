@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.stats import ttest_ind as t
 # from cluster_overlay import *
 from pprint import pprint
 
@@ -64,6 +65,11 @@ def cluster_rank_features(cf_analysis_df, cluster):
     cluster_summary = cf_analysis_df[cf_analysis_df['cluster'] == cluster]
     sorted_cs = cluster_summary[['feature','std_from_avg']].sort(columns = 'std_from_avg',ascending=False)
     return sorted_cs
+
+
+
+def get_stat_significance():
+    ts, p = t(a,b, equal_var = False)
 
 
 

@@ -3,9 +3,12 @@ import pandas as pd
 
 ######################################
 #read in the yearly player data that should be merged
+raw_data_2016_17 = pd.read_csv('~/capstone_project/data/aggregated_player_data_16_17.csv')
 raw_data_2015_16 = pd.read_csv('~/capstone_project/data/aggregated_player_data_15_16.csv')
 raw_data_2014_15 = pd.read_csv('~/capstone_project/data/aggregated_player_data_14_15.csv')
-raw_data_dfs = [raw_data_2015_16, raw_data_2014_15]
+raw_data_2013_14 = pd.read_csv('~/capstone_project/data/aggregated_player_data_13_14.csv')
+
+raw_data_dfs = [raw_data_2016_17,raw_data_2015_16, raw_data_2014_15, raw_data_2013_14,]
 #####################################
 
 def format_data(raw_data_dfs):
@@ -14,10 +17,12 @@ def format_data(raw_data_dfs):
     OUTPUT: generates file of aggregated, cleaned, and featurized data.  Also returns a df of same
     '''
 
-    include = ['player_id','display_name','min_game','total_made','ast_shot_made','pos',
+    include = ['player_id','display_name','min_game','total_made','pos',
     'attempt_RA','attempt_paint','attempt_corner_3','attempt_non_corner_3','attempt_mid',
-    'ast','blk','dreb','fta','gp','oreb','stl','tov',
+    'ast','blk','dreb_pos','fta','gp','oreb_pos','stl','tov',
     'd_fga_mid','d_fga_overall','d_fga_paint','d_fga_perim','d_fga_threes']
+
+    #try to get this one again: 'ast_shot_made',
 
     lst_of_dfs = []
 
@@ -29,9 +34,7 @@ def format_data(raw_data_dfs):
         data['min_tot'] = data['gp'] * data['min_game']
         data['ast_tot'] = data['ast'] * data['gp']
         data['blk_tot'] = data['blk'] * data['gp']
-        data['dreb_tot'] = data['dreb'] * data['gp']
         data['fta_tot'] = data['fta'] * data['gp']
-        data['oreb_tot'] = data['oreb'] * data['gp']
         data['stl_tot'] = data['stl'] * data['gp']
         data['tov_tot'] = data['tov'] * data['gp']
         data['d_fga_mid_tot'] = data['d_fga_mid'] * data['gp']
@@ -63,8 +66,6 @@ def format_data(raw_data_dfs):
     player_data['ast_shot_pct'] = player_data['ast_shot_made']/player_data['total_made']
     player_data['ast_pos'] = player_data['ast_tot']/player_data['pos']
     player_data['blk_min'] = player_data['blk_tot']/player_data['min_tot']
-    player_data['dreb_min'] = player_data['dreb_tot']/player_data['min_tot']
-    player_data['oreb_pos'] = player_data['oreb_tot']/player_data['pos']
     player_data['fta_pos'] = player_data['fta_tot']/player_data['pos']
     player_data['stl_min'] = player_data['stl_tot']/player_data['min_tot']
     player_data['d_fga_paint_pct'] = player_data['d_fga_paint_tot']/player_data['d_fga_overall_tot']
@@ -72,10 +73,12 @@ def format_data(raw_data_dfs):
     player_data['d_fga_threes_pct'] = player_data['d_fga_threes_tot']/player_data['d_fga_overall_tot']
     player_data['d_fga_mid_pct'] = player_data['d_fga_mid_tot']/player_data['d_fga_overall_tot']
 
-    drp = ['total_made','ast_shot_made','attempt_RA','attempt_paint',
-        'attempt_corner_3','attempt_non_corner_3','attempt_mid','ast_tot','blk_tot','dreb_tot','fta_tot',
-        'oreb_tot','stl_tot','tov_tot','pos','d_fga_mid_tot','d_fga_overall_tot','d_fga_paint_tot',
+    drp = ['total_made','attempt_RA','attempt_paint',
+        'attempt_corner_3','attempt_non_corner_3','attempt_mid','ast_tot','blk_tot','fta_tot',
+        'stl_tot','tov_tot','pos','d_fga_mid_tot','d_fga_overall_tot','d_fga_paint_tot',
         'd_fga_perim_tot','d_fga_threes_tot']
+
+        # try to get this one again: 'ast_shot_made'
 
     #clean the aggregated dataframe, push to csv and return a df
     player_data.drop(drp, inplace = True, axis = 1)

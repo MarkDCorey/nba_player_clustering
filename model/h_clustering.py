@@ -1,5 +1,5 @@
-from scipy.cluster.hierarchy import linkage, dendrogram, cophenet,fcluster
-from scipy.spatial.distance import pdist
+from scipy.cluster.hierarchy import linkage, dendrogram, cophenet,fcluster,maxdists,leaves_list
+from scipy.spatial.distance import pdist, squareform
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
@@ -14,32 +14,43 @@ player_mat = featurized_data[featurized_data.min_tot >500]
 player_info = player_mat[['player_id','display_name']]
 player_mat.drop(['player_id','display_name','min_tot','gp'], inplace = True, axis = 1)
 player_mat.fillna(0, inplace = True)
-player_mat = scale(player_mat)
+player_mat = normalize(player_mat)
 
-Z = linkage(player_mat, method = 'ward', metric = 'euclidean' )
+
+Z = linkage(player_mat, method = 'ward', metric = 'euclidean')
 
 c,coph_dists = cophenet(Z, pdist(player_mat))
 #
 #
 # # getting clusters...
 max_d = 100
-k=13
+k=11
 clusters = fcluster(Z, k, criterion='maxclust')
 # clusters = fcluster(Z, max_d, criterion='distance')
 clusters
 
 player_info['cluster'] = clusters
-player_info.to_csv('~/capstone_project/data/h_clusters_2015_16.csv')
+player_info.to_csv('~/capstone_project/data/clustered_players.csv')
 
 
-
+# fig = plt.figure(figsize = (8,8))
+#
+# plt.plot(range(1, len(Z)+1),Z[::-1, 2])
+# knee = np.diff(Z[::-1, 2], 2)
+# plt.plot(range(2, len(Z)), knee)
+# plt.title='Screeplot'
+# plt.xlabel='partition',
+# plt.ylabel='cluster distance'
+#
+# plt.tight_layout()
+# plt.show()
 
 
 
 
 # calculate full dendrogram
 plt.figure(figsize=(25, 10))
-plt.title('Hierarchical Clustering Dendrogram')
+# plt.title('Hierarchical Clustering Dendrogram')
 plt.xlabel('sample index')
 plt.ylabel('distance')
 dendrogram(
@@ -48,25 +59,25 @@ dendrogram(
     leaf_font_size=8.,  # font size for the x axis labels
 )
 plt.show()
-
-
-
-# plt.title('Hierarchical Clustering Dendrogram (truncated)')
-# plt.xlabel('sample index')
-# plt.ylabel('distance')
-# dendrogram(
-#     Z,
-#     truncate_mode='lastp',  # show only the last p merged clusters
-#     p=12,  # show only the last p merged clusters
-#     show_leaf_counts=False,  # otherwise numbers in brackets are counts
-#     leaf_rotation=90.,
-#     leaf_font_size=12.,
-#     show_contracted=True,  # to get a distribution impression in truncated branches
-# )
-# plt.show()
-
-
 #
+#
+#
+# # plt.title('Hierarchical Clustering Dendrogram (truncated)')
+# # plt.xlabel('sample index')
+# # plt.ylabel('distance')
+# # dendrogram(
+# #     Z,
+# #     truncate_mode='lastp',  # show only the last p merged clusters
+# #     p=12,  # show only the last p merged clusters
+# #     show_leaf_counts=False,  # otherwise numbers in brackets are counts
+# #     leaf_rotation=90.,
+# #     leaf_font_size=12.,
+# #     show_contracted=True,  # to get a distribution impression in truncated branches
+# # )
+# # plt.show()
+#
+#
+# #
 # plt.title('Hierarchical Clustering Dendrogram (truncated)')
 # plt.xlabel('sample index or (cluster size)')
 # plt.ylabel('distance')
@@ -79,9 +90,9 @@ plt.show()
 #     show_contracted=True,  # to get a distribution impression in truncated branches
 # )
 # plt.show()
-
-
-
+#
+#
+#
 def fancy_dendrogram(*args, **kwargs):
     max_d = kwargs.pop('max_d', None)
     if max_d and 'color_threshold' not in kwargs:

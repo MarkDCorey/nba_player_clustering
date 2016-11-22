@@ -1,6 +1,10 @@
 from nba_py import team, constants
 import pandas as pd
 
+'''
+pulls, merges and persists lineup performance data by season 
+'''
+
 #list of team ids
 def get_team_ids():
     team_ids = []
@@ -19,6 +23,7 @@ def get_lineups(team_id_lst,season = '2016-17'):
             points_scored = float(team_lineups.iloc[j]['PTS'])
             points_allowed = points_scored - float(team_lineups.iloc[j]['PLUS_MINUS'])
             GP = float(team_lineups.iloc[j]['GP'])
+            MIN = float(team_lineups.iloc[j]['MIN'])
             FGA = float(team_lineups.iloc[j]['FGA'])
             FTA = float(team_lineups.iloc[j]['FTA'])
             OREB = float(team_lineups.iloc[j]['OREB'])
@@ -30,7 +35,8 @@ def get_lineups(team_id_lst,season = '2016-17'):
                                  'FGA_l':(FGA * GP),
                                  'FTA_l':(FTA * GP),
                                  'OREB_l':(OREB * GP),
-                                 'TOV_l':(TOV * GP) })
+                                 'TOV_l':(TOV * GP),
+                                 'MIN_TOT':(MIN*GP)})
 
     lineups_df = pd.DataFrame(lst_of_dicts)
     return lineups_df
