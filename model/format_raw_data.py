@@ -3,10 +3,10 @@ import pandas as pd
 
 ######################################
 #read in the yearly player data that should be merged
-raw_data_2016_17 = pd.read_csv('~/capstone_project/data/aggregated_player_data_16_17.csv')
-raw_data_2015_16 = pd.read_csv('~/capstone_project/data/aggregated_player_data_15_16.csv')
-raw_data_2014_15 = pd.read_csv('~/capstone_project/data/aggregated_player_data_14_15.csv')
-raw_data_2013_14 = pd.read_csv('~/capstone_project/data/aggregated_player_data_13_14.csv')
+raw_data_2016_17 = pd.read_csv('~/capstone_project/data/raw_player_data_16_17.csv')
+raw_data_2015_16 = pd.read_csv('~/capstone_project/data/raw_player_data_15_16.csv')
+raw_data_2014_15 = pd.read_csv('~/capstone_project/data/raw_player_data_14_15.csv')
+raw_data_2013_14 = pd.read_csv('~/capstone_project/data/raw_player_data_13_14.csv')
 
 raw_data_dfs = [raw_data_2016_17,raw_data_2015_16, raw_data_2014_15, raw_data_2013_14,]
 #####################################
