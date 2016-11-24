@@ -1,10 +1,10 @@
 from scipy.cluster.hierarchy import linkage, dendrogram, cophenet,fcluster,maxdists,leaves_list
+from sklearn import decomposition, datasets,ensemble, manifold, random_projection, metrics
 from scipy.spatial.distance import pdist, squareform
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 from sklearn.preprocessing import StandardScaler,normalize,scale
-from sklearn.decomposition import NMF
 
 
 
@@ -14,23 +14,26 @@ player_mat = featurized_data[featurized_data.min_tot >500]
 player_info = player_mat[['player_id','display_name']]
 player_mat.drop(['player_id','display_name','min_tot','gp'], inplace = True, axis = 1)
 player_mat.fillna(0, inplace = True)
-player_mat = normalize(player_mat)
+player_mat = scale(player_mat)
+
+pca = decomposition.PCA(n_components=7) #, whiten=True
+fit_pca = pca.fit_transform(player_mat)
 
 
-Z = linkage(player_mat, method = 'ward', metric = 'euclidean')
+Z = linkage(fit_pca, method = 'centroid', metric = 'euclidean')
 
-c,coph_dists = cophenet(Z, pdist(player_mat))
+c,coph_dists = cophenet(Z, pdist(fit_pca))
 #
 #
 # # getting clusters...
 max_d = 100
-k=11
-clusters = fcluster(Z, k, criterion='maxclust')
-# clusters = fcluster(Z, max_d, criterion='distance')
-clusters
-
-player_info['cluster'] = clusters
-player_info.to_csv('~/capstone_project/data/clustered_players.csv')
+# k=10
+# # clusters = fcluster(Z, k, criterion='maxclust')
+# # # clusters = fcluster(Z, max_d, criterion='distance')
+# # clusters
+# #
+# # player_info['cluster'] = clusters
+# # player_info.to_csv('~/capstone_project/data/clustered_players.csv')
 
 
 # fig = plt.figure(figsize = (8,8))
@@ -51,13 +54,14 @@ player_info.to_csv('~/capstone_project/data/clustered_players.csv')
 # calculate full dendrogram
 plt.figure(figsize=(25, 10))
 # plt.title('Hierarchical Clustering Dendrogram')
-plt.xlabel('sample index')
-plt.ylabel('distance')
+# plt.xlabel('sample index', fontsize = 14)
+plt.ylabel('Distance', fontsize = 20)
 dendrogram(
     Z,
     leaf_rotation=90.,  # rotates the x axis labels
     leaf_font_size=8.,  # font size for the x axis labels
 )
+plt.savefig("full_dendrogram.png", dpi= 300)
 plt.show()
 #
 #
@@ -102,9 +106,9 @@ def fancy_dendrogram(*args, **kwargs):
     ddata = dendrogram(*args, **kwargs)
 
     if not kwargs.get('no_plot', False):
-        plt.title('Hierarchical Clustering Dendrogram (truncated)')
-        plt.xlabel('sample index or (cluster size)')
-        plt.ylabel('distance')
+        plt.title('Truncated Dendrogram', fontsize = 14)
+        plt.xlabel('Cluster size', fontsize = 12)
+        plt.ylabel('Distance', fontsize = 12)
         for i, d, c in zip(ddata['icoord'], ddata['dcoord'], ddata['color_list']):
             x = 0.5 * sum(i[1:3])
             y = d[1]
@@ -130,4 +134,5 @@ fancy_dendrogram(
     annotate_above=10,
     max_d=max_d,  # plot a horizontal cut-off line
 )
+plt.savefig("trunc_dendrogram.png", dpi= 300)
 plt.show()

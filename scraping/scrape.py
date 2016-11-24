@@ -6,7 +6,7 @@ import time
 
 '''
 uses python client to pull in raw data from various siloed APIs on NBA_Stats.com
-merges data by season and persists 
+merges data by season and persists
 '''
 
 #get a list of the player ids for a given season
@@ -599,7 +599,7 @@ def generate_posessions_df(lineups):
 
     return pos_df
 
-def generate_reb_pos_df(player_id_list,year):
+def generate_pos_stats_df(player_id_list,year):
     lst_of_dicts = []
 
     for id in player_id_list:
@@ -607,9 +607,12 @@ def generate_reb_pos_df(player_id_list,year):
         stats = player.PlayerGeneralSplits(player_id = id, per_mode='PerPossession', season = year).overall()
         dreb_pos = stats['DREB'].sum()
         oreb_pos = stats['OREB'].sum()
+        blk_pos = stats['BLK'].sum()
+        stl_pos = stats['STL'].sum()
 
         temp_dict = {'player_id': str(id),
-                'dreb_pos':float(dreb_pos),'oreb_pos':float(oreb_pos)}
+                'dreb_pos':float(dreb_pos),'oreb_pos':float(oreb_pos),
+                'blk_pos':float(blk_pos), 'stl_pos':float(stl_pos)}
 
         lst_of_dicts.append(temp_dict)
 
@@ -619,12 +622,12 @@ def generate_reb_pos_df(player_id_list,year):
 
 
 if __name__ == '__main__':
-    year = '2016-17'
+    year = '2013-14'
     #create ordered list of player ids
     print 'Get player_ids'
-    player_ids = get_player_ids(year = '2016-17')
+    player_ids = get_player_ids(year = '2013-14')
     # player_ids = player_ids[:3]
-    lineups = pd.read_csv('~/capstone_project/data/lineup_data_2016_17.csv')
+    lineups = pd.read_csv('~/capstone_project/data/lineup_data_2013_14.csv')
 
 
     #clean and munge
@@ -632,6 +635,8 @@ if __name__ == '__main__':
     player_shot_loc_df = generate_player_shot_loc_df(player_ids, year)
     # print 'Create shot_df'
     # shot_df = generate_player_shot_df(player_ids,year)
+    print 'Create pos_stats_df'
+    pos_stats_df = generate_pos_stats_df(player_ids,year)
     print 'Create pos_df'
     pos_df = generate_posessions_df(lineups)
     print 'Create defense_df'
@@ -644,20 +649,18 @@ if __name__ == '__main__':
     overalls_df = generate_overalls_df(player_ids,year)
     # print 'Create rebounding_df'
     # rebounding_df = generate_rebounding_df(player_ids,year)
-    print 'Create reb_pos_df'
-    reb_pos_df = generate_reb_pos_df(player_ids,year)
     # print 'Create speed_dist_df'
     # speed_dist_df = generate_speed_dist_df(player_ids, year)
     # print 'Create pass_df'
     # pass_df = generate_pass_df(player_ids, year)
-    # print 'Create ast_shot_df'
-    # ast_shot_df = generate_ast_shot_df(player_ids, year)
+    print 'Create ast_shot_df'
+    ast_shot_df = generate_ast_shot_df(player_ids, year)
 
     #create master df
     merged_df = pd.concat([summary_df, player_shot_loc_df, overalls_df, \
-        defense_df, reb_pos_df], axis=1)
+        defense_df, pos_stats_df,ast_shot_df], axis=1)
 
     merged_df = merged_df.merge(pos_df,how = 'left',left_index = True, right_index = True, sort = True)
 
     #store df in csv
-    merged_df.to_csv('~/capstone_project/data/raw_player_data_16_17.csv')
+    merged_df.to_csv('~/capstone_project/data/raw_player_data_13_14.csv')

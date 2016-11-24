@@ -437,4 +437,4 @@ def generate_reb_pos_df(player_id_list,year):
 
 player_ids = get_player_ids(year = '2015-16')
 pids = player_ids[:10]
-test = generate_player_shot_loc_df(pids, year = '2015-16')
+test = generate_ast_shot_df(pids, year = '2015-16')

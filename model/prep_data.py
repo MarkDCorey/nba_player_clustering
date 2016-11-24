@@ -2,109 +2,80 @@ from __future__ import division
 import pandas as pd
 
 
-#read in data to df
-player_data = pd.read_csv('~/capstone_project/data/aggregated_player_data_15_16.csv')
-player_data.fillna(0, inplace = True)
+def format_data(raw_data_dfs):
+    '''
+    INPUT: takes in a list of raw data dfs, each representing a season's worth of data
+    OUTPUT: generates file of aggregated, cleaned, and featurized data.  Also returns a df of same
+    '''
 
-#reduce the df
-include = ['player_id','display_name','min_game','total_made','ast_shot_made','pos',
-'attempt_RA','attempt_paint','attempt_corner_3','attempt_non_corner_3','attempt_mid',
-'ast','blk','dreb','fta','gp','oreb','stl','tov',
-'d_freq_paint','d_freq_perim','d_freq_mid','d_freq_threes']
-
-#removed age, catch_shoot_freq,'avg_speed_def','avg_speed_off',,'d_ppm_overall','d_ppm_paint','d_ppm_perim',
-
-player_data_rd = player_data[include]
-#
-# #add 'min_tot' to new df
-player_data_rd['min_tot'] = player_data_rd['gp'] * player_data_rd['min_game']
-
-#for shots, volume and efficiency are probably the most relevant
+    include = ['player_id','display_name','min_game','pos',
+    'attempt_RA','attempt_paint','attempt_corner_3','attempt_non_corner_3','attempt_mid',
+    'ast','blk_pos','dreb_pos','fta','gp','oreb_pos','stl_pos',
+    'd_fga_overall','d_fga_paint','d_fga_threes','ast_shot_made',
+    'made_RA','made_corner_3','made_mid','made_non_corner_3','made_paint']
 
 
-player_data_rd['attempt_RA_pos'] = player_data_rd['attempt_RA']/player_data_rd['pos']
-player_data_rd['attempt_paint_pos'] = player_data_rd['attempt_paint']/player_data_rd['pos']
-player_data_rd['attempt_corner_3_pos'] = player_data_rd['attempt_corner_3']/player_data_rd['pos']
-player_data_rd['attempt_non_corner_3_pos'] = player_data_rd['attempt_non_corner_3']/player_data_rd['pos']
-player_data_rd['attempt_mid_pos'] = player_data_rd['attempt_mid']/player_data_rd['pos']
+    lst_of_dfs = []
 
-player_data_rd['ast_shot_pct'] = player_data_rd['ast_shot_made']/player_data_rd['total_made']
+    #iterate over dfs. for each, create new cols required for aggregation and drop unnecessary cols.
+    #add each cleaned df to a list
+    for df in raw_data_dfs:
+        df.fillna(0, inplace = True)
+        data = df[include]
+        data['total_made'] = data['made_RA'] + data['made_corner_3'] + data['made_mid'] \
+            + data['made_non_corner_3'] + data['made_paint']
+        data['min_tot'] = data['gp'] * data['min_game']
+        data['ast_tot'] = data['ast'] * data['gp']
+        data['fta_tot'] = data['fta'] * data['gp']
+        data['d_fga_overall_tot'] = data['d_fga_overall'] * data['gp']
+        data['d_fga_paint_tot'] = data['d_fga_paint'] * data['gp']
+        data['d_fga_threes_tot'] = data['d_fga_threes'] * data['gp']
+        data['d_fga_mid_tot'] = data['d_fga_overall_tot'] - data['d_fga_paint_tot'] - data['d_fga_threes_tot']
 
+        drop_cols = ['min_game','ast',
+                     'fta','d_fga_overall','d_fga_paint',
+                     'd_fga_threes','made_RA','made_corner_3','made_mid','made_non_corner_3','made_paint']
+        data.drop(drop_cols, inplace = True, axis = 1)
+        lst_of_dfs.append(data)
 
-# player_data_rd['attempt_at_rim_2_min'] = player_data_rd['attempt_at_rim_2']/player_data_rd['min_tot']
-# player_data_rd['attempt_cut_run_2_min'] = player_data_rd['attempt_cut_run_2']/player_data_rd['min_tot']
-# player_data_rd['attempt_drive_2_min'] = player_data_rd['attempt_drive_2']/player_data_rd['min_tot']
-# player_data_rd['attempt_jumper_2_min'] = player_data_rd['attempt_jumper_2']/player_data_rd['min_tot']
-# player_data_rd['attempt_jumper_3_min'] = player_data_rd['attempt_jumper_3']/player_data_rd['min_tot']
-# player_data_rd['attempt_off_dribble_2_min'] = player_data_rd['attempt_off_dribble_2']/player_data_rd['min_tot']
-# player_data_rd['attempt_off_dribble_3_min'] = player_data_rd['attempt_off_dribble_3']/player_data_rd['min_tot']
-# player_data_rd['attempt_post_2_min'] = player_data_rd['attempt_post_2']/player_data_rd['min_tot']
-# player_data_rd['made_at_rim_2_min'] = player_data_rd['made_at_rim_2']/player_data_rd['min_tot']
-# player_data_rd['made_cut_run_2_min'] = player_data_rd['made_cut_run_2']/player_data_rd['min_tot']
-# player_data_rd['made_drive_2_min'] = player_data_rd['made_drive_2']/player_data_rd['min_tot']
-# player_data_rd['made_jumper_2_min'] = player_data_rd['made_jumper_2']/player_data_rd['min_tot']
-# player_data_rd['made_jumper_3_min'] = player_data_rd['made_jumper_3']/player_data_rd['min_tot']
-# player_data_rd['made_off_dribble_2_min'] = player_data_rd['made_off_dribble_2']/player_data_rd['min_tot']
-# player_data_rd['made_off_dribble_3_min'] = player_data_rd['made_off_dribble_3']/player_data_rd['min_tot']
-# player_data_rd['made_post_2_min'] = player_data_rd['made_post_2']/player_data_rd['min_tot']
-# player_data_rd['eff_at_rim_2'] = (player_data_rd['made_at_rim_2']/player_data_rd['attempt_at_rim_2'])
-# player_data_rd['eff_cut_run_2'] = player_data_rd['made_cut_run_2']/player_data_rd['attempt_cut_run_2']
-# player_data_rd['eff_drive_2'] = player_data_rd['made_drive_2']/player_data_rd['attempt_drive_2'] #if player_data_rd['attempt_drive_2'] > 10 else 0.
-# player_data_rd['eff_jumper_2'] = player_data_rd['made_jumper_2']/player_data_rd['attempt_jumper_2'] #if player_data_rd['attempt_jumper_2'] > 10 else 0.
-# player_data_rd['eff_jumper_3'] = player_data_rd['made_jumper_3']/player_data_rd['attempt_jumper_3'] #if player_data_rd['attempt_jumper_3'] > 10 else 0.
-# player_data_rd['eff_off_dribble_2'] = player_data_rd['made_off_dribble_2']/player_data_rd['attempt_off_dribble_2'] #if player_data_rd['attempt_off_dribble_2'] > 10 else 0.
-# player_data_rd['eff_off_dribble_3'] = player_data_rd['made_off_dribble_3']/player_data_rd['attempt_off_dribble_3'] #if player_data_rd['attempt_off_dribble_3'] > 10 else 0.
-# player_data_rd['eff_post_2'] = player_data_rd['made_post_2']/player_data_rd['attempt_post_2'] #if player_data_rd['attempt_post_2'] > 10 else 0.
+    #merged the cleaned dfs
+    merged_data = lst_of_dfs[0]
+    for i, df in enumerate(lst_of_dfs):
+        if i > 0:
+            merged_data = merged_data.append(df, ignore_index= True)
 
-#standardizing to per min
-player_data_rd['ast_pos'] = (player_data_rd['ast']*player_data_rd['gp'])/player_data_rd['pos']
-player_data_rd['blk_min'] = (player_data_rd['blk']*player_data_rd['gp'])/player_data_rd['min_tot']
-# player_data_rd['blk_a_min'] = (player_data_rd['blk_a']*player_data_rd['gp'])/player_data_rd['min_tot']
-player_data_rd['dreb_min'] = (player_data_rd['dreb']*player_data_rd['gp'])/player_data_rd['min_tot']
-player_data_rd['oreb_pos'] = (player_data_rd['oreb']*player_data_rd['gp'])/player_data_rd['pos']
-#removed ftm per min and added ft efficiency in its place
-player_data_rd['fta_pos'] = (player_data_rd['fta']*player_data_rd['gp'])/player_data_rd['pos']
-player_data_rd['stl_min'] = (player_data_rd['stl']*player_data_rd['gp'])/player_data_rd['min_tot']
+    #group data in the merged file and sum each numeric column.
+    #create new features and drop the unnecessary remaining columns
+    merged_data = merged_data.groupby(['player_id','display_name']).sum()
+    player_data = merged_data
+    player_data['attempt_RA_pos'] = player_data['attempt_RA']/player_data['pos']
+    player_data['attempt_paint_pos'] = player_data['attempt_paint']/player_data['pos']
+    player_data['attempt_corner_3_pos'] = player_data['attempt_corner_3']/player_data['pos']
+    player_data['attempt_non_corner_3_pos'] = player_data['attempt_non_corner_3']/player_data['pos']
+    player_data['attempt_mid_pos'] = player_data['attempt_mid']/player_data['pos']
+    player_data['ast_shot_pct'] = player_data['ast_shot_made']/player_data['total_made']
+    player_data['ast_pos'] = player_data['ast_tot']/player_data['pos']
+    player_data['fta_pos'] = player_data['fta_tot']/player_data['pos']
+    player_data['d_fga_paint_pct'] = player_data['d_fga_paint_tot']/player_data['d_fga_overall_tot']
+    player_data['d_fga_threes_pct'] = player_data['d_fga_threes_tot']/player_data['d_fga_overall_tot']
+    player_data['d_fga_mid_pct'] = player_data['d_fga_mid_tot']/player_data['d_fga_overall_tot']
 
-#ft efficiency
-# player_data_rd['eff_ft'] = player_data_rd['ftm']/player_data_rd['fta']
-
-#ast/turnover efficiency
-# player_data_rd['ast_tov'] = player_data_rd['ast']/player_data_rd['tov']
-
-#use contested rb as a separate feature to reb.  is this redundant
-# player_data_rd['c_dreb_min'] = (player_data_rd['c_dreb_game']*player_data_rd['gp'])/player_data_rd['min_tot']
-# player_data_rd['c_oreb_min'] = (player_data_rd['c_oreb_game']*player_data_rd['gp'])/player_data_rd['min_tot']
-
-#d_fga useful to determine how often they are guarding the ball per min
-# player_data_rd['d_fga_paint_min'] = (player_data_rd['d_fga_paint']*player_data_rd['gp'])/player_data_rd['min_tot']
-# player_data_rd['d_fga_perim_min'] = (player_data_rd['d_fga_perim']*player_data_rd['gp'])/player_data_rd['min_tot']
-# player_data_rd['d_fga_mid_min'] = (player_data_rd['d_fga_mid']*player_data_rd['gp'])/player_data_rd['min_tot']
-# player_data_rd['d_fga_threes_min'] = (player_data_rd['d_fga_threes']*player_data_rd['gp'])/player_data_rd['min_tot']
-
-#efficiency for each
-# player_data_rd['d_eff_paint'] = player_data_rd['d_fgm_paint']/player_data_rd['d_fga_paint']
-# player_data_rd['d_eff_perim'] = player_data_rd['d_fgm_perim']/player_data_rd['d_fga_perim']
-# player_data_rd['d_eff_mid'] = player_data_rd['d_fgm_mid']/player_data_rd['d_fga_mid']
-# player_data_rd['d_eff_threes'] = player_data_rd['d_fgm_threes']/player_data_rd['d_fga_threes']
-
-#how much ground they are covering per min on off and def
-# player_data_rd['mi_def_min'] = (player_data_rd['mi_game_def']*player_data_rd['gp'])/player_data_rd['min_tot']
-# player_data_rd['mi_off_min'] = (player_data_rd['mi_game_off']*player_data_rd['gp'])/player_data_rd['min_tot']
-
-#passes per min
-# player_data_rd['pass_min']= player_data_rd['pass_total']/player_data_rd['min_tot']
+    drp = ['attempt_RA','attempt_paint',
+        'attempt_corner_3','attempt_non_corner_3','attempt_mid','ast_tot','fta_tot',
+        'pos','d_fga_mid_tot','d_fga_overall_tot','d_fga_paint_tot',
+        'd_fga_threes_tot','ast_shot_made','total_made']
 
 
-#...and drop these
-drp = ['min_game','total_made','ast_shot_made','attempt_RA','attempt_paint',
-'attempt_corner_3','attempt_non_corner_3','attempt_mid','ast','blk','dreb','fta',
-'gp','oreb','stl','tov','pos','total_made']
+    #clean the aggregated dataframe, push to csv and return a df
+    player_data.drop(drp, inplace = True, axis = 1)
+    player_data.fillna(0, inplace = True)
+    player_data.to_csv('~/capstone_project/data/featurized_data.csv')
+    return player_data
 
-
-
-# #remember to check for null and 0 values
-#     #some records are missing height and weight (0 as placeholder)
-
-player_data_rd.drop(drp, inplace = True, axis = 1)
-player_data_rd.to_csv('~/capstone_project/data/featurized_data.csv')
+if __name__ == '__main__':
+    raw_data_2016_17 = pd.read_csv('~/capstone_project/data/raw_player_data_16_17.csv')
+    raw_data_2015_16 = pd.read_csv('~/capstone_project/data/raw_player_data_15_16.csv')
+    raw_data_2014_15 = pd.read_csv('~/capstone_project/data/raw_player_data_14_15.csv')
+    raw_data_2013_14 = pd.read_csv('~/capstone_project/data/raw_player_data_13_14.csv')
+    raw_data_dfs = [raw_data_2016_17,raw_data_2015_16, raw_data_2014_15, raw_data_2013_14]
+    player_data = format_data(raw_data_dfs)

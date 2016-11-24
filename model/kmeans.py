@@ -22,7 +22,7 @@ import matplotlib.cm as cm
 
 
 def silhouette_analysis(X):
-    range_n_clusters = [2,4,6,8,10,12,14,16,18,20]
+    range_n_clusters = [4,6,8,10,12,14]
 
     for n_clusters in range_n_clusters:
         # Create a subplot with 1 row and 2 columns
@@ -40,7 +40,8 @@ def silhouette_analysis(X):
 
         # Initialize the clusterer with n_clusters value and a random generator
         # seed of 10 for reproducibility.
-        clusterer = KMeans(n_clusters=n_clusters, random_state=10)
+        clusterer = KMeans(n_clusters=n_clusters, init='k-means++', n_init=10, max_iter=300, tol=0.0001, \
+        precompute_distances='auto', verbose=0, random_state=10, copy_x=True, n_jobs=1, algorithm='auto')
         cluster_labels = clusterer.fit_predict(X)
 
         # The silhouette_score gives the average value for all the samples.
@@ -134,29 +135,31 @@ def plot_k_sse(X, min_k, max_k):
 if __name__ == '__main__':
     #read in the aggregated/saved data into a df
     featurized_data = pd.read_csv('~/capstone_project/data/featurized_data.csv')
-    test = featurized_data[featurized_data.min_tot > 500]
-    test_players = test[['player_id','display_name']]
-    test.drop(['player_id','display_name','min_tot','gp'], inplace = True, axis = 1)
-    #,'age','height','weight','season_exp','min_game'
-    test.fillna(0, inplace = True)
-    test = scale(test)
-    k_vals = [11]
+    player_mat = featurized_data[featurized_data.min_tot >500]
+    player_info = player_mat[['player_id','display_name']]
+    player_mat.drop(['player_id','display_name','min_tot','gp'], inplace = True, axis = 1)
+    player_mat.fillna(0, inplace = True)
+    player_mat = scale(player_mat)
+
+    k_vals = [4,5,6,7,8,9,10,11,12,13,14]
     inertia_list = []
     for i in k_vals:
-        KMeans_test = KMeans(n_clusters=i, init='k-means++', n_init=10, max_iter=300, tol=0.0001, \
+        kmeans = KMeans(n_clusters=i, init='k-means++', n_init=10, max_iter=300, tol=0.0001, \
         precompute_distances='auto', verbose=0, random_state=None, copy_x=True, n_jobs=1, algorithm='auto')
-        KMeans_test.fit_transform(test)
-        test_labels = KMeans_test.labels_
-        test_players['cluster'] = test_labels
+        kmeans.fit_transform(player_mat)
+        cluster_labels = kmeans.labels_
+        player_info['cluster'] = cluster_labels
 
-        s_score = silhouette_score(test, test_labels, metric='euclidean',sample_size=None)
-        inertia_list.append(KMeans_test.inertia_)
+        s_score = silhouette_score(player_mat, cluster_labels, metric='euclidean',sample_size=None)
+        inertia_list.append(kmeans.inertia_)
         print('k_val: ',i)
         print('s_score: ',s_score)
-        print('total_inertia: ',KMeans_test.inertia_)
+        print('total_inertia: ',kmeans.inertia_)
 
     plt.plot(k_vals, inertia_list)
     plt.xlabel('k')
     plt.ylabel('sum of error')
     plt.show()
+
+    silhouette_analysis(player_mat)
     # test_players.to_csv('~/capstone_project/data/cluster_test.csv')

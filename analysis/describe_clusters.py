@@ -75,7 +75,7 @@ def cluster_rank_features(cf_analysis_df, cluster):
 if __name__ == '__main__':
     #read in feature mat, the player clusters, and the linups
     featurized_mat = pd.read_csv('~/capstone_project/data/featurized_data.csv')
-    player_clusters = pd.read_csv('~/capstone_project/data/h_clusters_2015_16.csv')
+    player_clusters = pd.read_csv('~/capstone_project/data/gmm_clusters.csv')
 
     #get feature stats
     feature_stats = get_feature_stats(featurized_mat, minimum_min =500)
@@ -87,7 +87,7 @@ if __name__ == '__main__':
 
     cluster_feat_df = cluster_feat_analyis(feature_stats, features_clusters)
 
-    for i in range(16):
+    for i in range(11):
         test = cluster_rank_features(cluster_feat_df, i)
         print '    Cluster:',i
         pprint(test)

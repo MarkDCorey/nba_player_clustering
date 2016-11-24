@@ -19,7 +19,7 @@ raw_lineup_data_2013_14 = pd.read_csv('~/capstone_project/data/lineup_data_2013_
 raw_lineup_data_dfs = [raw_lineup_data_2016_17,raw_lineup_data_2015_16, raw_lineup_data_2014_15,raw_lineup_data_2013_14]
 
 #read in the player clusters (model output)
-player_clusters = pd.read_csv('~/capstone_project/data/h_clusters_2015_16.csv')
+player_clusters = pd.read_csv('~/capstone_project/data/gmm_clusters.csv')
 #####################################
 
 
@@ -121,7 +121,7 @@ def get_stat_significance(cluster_lineup_df, lineup_minute_min):
     return cluster_combo_scores
 
 
-lineup_cluster_df = add_clusters_to_lineups(lineup_data,player_clusters)
+lineup_cluster_df = add_clusters_to_lineups(raw_lineup_data_dfs,player_clusters)
 test = get_stat_significance(lineup_cluster_df)
 
 
