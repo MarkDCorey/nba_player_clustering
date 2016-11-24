@@ -2,7 +2,7 @@ from nba_py import team, constants
 import pandas as pd
 
 '''
-pulls, merges and persists lineup performance data by season 
+pulls, merges and persists lineup performance data by season
 '''
 
 #list of team ids
@@ -46,7 +46,7 @@ def get_lineups(team_id_lst,season = '2016-17'):
 
 
 if __name__ == '__main__':
-    year = '2016-17'
+    year = '2012-13'
     team_ids = get_team_ids()
     lineups_df = get_lineups(team_ids, season=year)
-    lineups_df.to_csv('~/capstone_project/data/lineup_data_2016_17.csv')
+    lineups_df.to_csv('~/capstone_project/data/lineup_data_2012_13.csv')
