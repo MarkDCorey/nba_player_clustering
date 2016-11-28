@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.stats import ttest_ind as t
 # from cluster_overlay import *
 from pprint import pprint
 
@@ -75,10 +74,10 @@ def cluster_rank_features(cf_analysis_df, cluster):
 if __name__ == '__main__':
     #read in feature mat, the player clusters, and the linups
     featurized_mat = pd.read_csv('~/capstone_project/data/featurized_data.csv')
-    player_clusters = pd.read_csv('~/capstone_project/data/gmm_clusters.csv')
+    player_clusters = pd.read_csv('~/capstone_project/data/composite_clusters.csv')
 
     #get feature stats
-    feature_stats = get_feature_stats(featurized_mat, minimum_min =500)
+    feature_stats = get_feature_stats(featurized_mat, minimum_min =200)
 
     #concat feature matrix with clusters
     featurized_mat.set_index('player_id', inplace=True, drop = True)
@@ -87,7 +86,7 @@ if __name__ == '__main__':
 
     cluster_feat_df = cluster_feat_analyis(feature_stats, features_clusters)
 
-    for i in range(11):
+    for i in range(10):
         test = cluster_rank_features(cluster_feat_df, i)
         print '    Cluster:',i
         pprint(test)

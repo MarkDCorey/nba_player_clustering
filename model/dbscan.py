@@ -12,13 +12,15 @@ from sklearn.decomposition import NMF
 
 
 featurized_data = pd.read_csv('~/capstone_project/data/featurized_data.csv')
-player_mat = featurized_data[featurized_data.min_tot >200]
+player_mat = featurized_data[featurized_data.min_tot >250]
 player_info = player_mat[['player_id','display_name']]
-player_mat.drop(['Unnamed: 0','player_id','display_name','min_tot'], inplace = True, axis = 1)
+player_mat.drop(['player_id','display_name','min_tot','gp'], inplace = True, axis = 1)
 player_mat.fillna(0, inplace = True)
-player_mat = scale(player_mat)
 
-db = DBSCAN(eps=0.5, min_samples=5).fit(player_mat)
+X = StandardScaler().fit_transform(player_mat)
+
+
+db = DBSCAN(eps=9.9, min_samples=10).fit(X)
 # core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
 # core_samples_mask[db.core_sample_indices_] = True
 labels = db.labels_

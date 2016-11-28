@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 
 
 featurized_data = pd.read_csv('~/capstone_project/data/featurized_data.csv')
-player_mat = featurized_data[featurized_data.min_tot >500]
+player_mat = featurized_data[featurized_data.min_tot >200]
 player_info = player_mat[['player_id','display_name']]
 player_mat.drop(['player_id','display_name','min_tot','gp'], inplace = True, axis = 1)
 player_mat.fillna(0, inplace = True)

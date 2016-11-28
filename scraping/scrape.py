@@ -622,15 +622,17 @@ def generate_pos_stats_df(player_id_list,year):
 
 
 if __name__ == '__main__':
-    year = '2013-14'
+    year = '2012-13'
     #create ordered list of player ids
     print 'Get player_ids'
-    player_ids = get_player_ids(year = '2013-14')
+    player_ids = get_player_ids(year = '2012-13')
     # player_ids = player_ids[:3]
-    lineups = pd.read_csv('~/capstone_project/data/lineup_data_2013_14.csv')
+    lineups = pd.read_csv('~/capstone_project/data/lineup_data_2012_13.csv')
 
 
     #clean and munge
+    print 'Create defense_df'
+    defense_df = generate_defense_df(player_ids, year)
     print 'Create shot_loc_df'
     player_shot_loc_df = generate_player_shot_loc_df(player_ids, year)
     # print 'Create shot_df'
@@ -639,8 +641,6 @@ if __name__ == '__main__':
     pos_stats_df = generate_pos_stats_df(player_ids,year)
     print 'Create pos_df'
     pos_df = generate_posessions_df(lineups)
-    print 'Create defense_df'
-    defense_df = generate_defense_df(player_ids, year)
     print 'Create summary_df'
     summary_df = generate_player_summary_df(player_ids)
     # print 'Create catch_shoot_df'
@@ -663,4 +663,4 @@ if __name__ == '__main__':
     merged_df = merged_df.merge(pos_df,how = 'left',left_index = True, right_index = True, sort = True)
 
     #store df in csv
-    merged_df.to_csv('~/capstone_project/data/raw_player_data_13_14.csv')
+    merged_df.to_csv('~/capstone_project/data/raw_player_data_12_13.csv')

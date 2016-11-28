@@ -10,30 +10,32 @@ from sklearn.preprocessing import StandardScaler,normalize,scale
 
 
 featurized_data = pd.read_csv('~/capstone_project/data/featurized_data.csv')
-player_mat = featurized_data[featurized_data.min_tot >500]
+player_mat = featurized_data[featurized_data.min_tot >200]
 player_info = player_mat[['player_id','display_name']]
 player_mat.drop(['player_id','display_name','min_tot','gp'], inplace = True, axis = 1)
 player_mat.fillna(0, inplace = True)
-player_mat = scale(player_mat)
+# player_mat = normalize(player_mat)
+player_mat = normalize(player_mat)
 
-pca = decomposition.PCA(n_components=7) #, whiten=True
-fit_pca = pca.fit_transform(player_mat)
+pca = decomposition.PCA(n_components=13) #, whiten=True
+player_mat = pca.fit_transform(player_mat)
+player_mat = normalize(player_mat)
 
 
-Z = linkage(fit_pca, method = 'centroid', metric = 'euclidean')
+Z = linkage(player_mat, method = 'ward')#, metric = 'euclidean')
 
-c,coph_dists = cophenet(Z, pdist(fit_pca))
+c,coph_dists = cophenet(Z, pdist(player_mat))
 #
 #
 # # getting clusters...
 max_d = 100
-# k=10
-# # clusters = fcluster(Z, k, criterion='maxclust')
-# # # clusters = fcluster(Z, max_d, criterion='distance')
-# # clusters
-# #
-# # player_info['cluster'] = clusters
-# # player_info.to_csv('~/capstone_project/data/clustered_players.csv')
+k=3
+clusters = fcluster(Z, k, criterion='maxclust')
+# # clusters = fcluster(Z, max_d, criterion='distance')
+clusters
+
+player_info['cluster'] = clusters
+player_info.to_csv('~/capstone_project/data/clustered_players.csv')
 
 
 # fig = plt.figure(figsize = (8,8))

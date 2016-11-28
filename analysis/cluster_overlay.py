@@ -16,11 +16,13 @@ raw_lineup_data_2016_17 = pd.read_csv('~/capstone_project/data/lineup_data_2016_
 raw_lineup_data_2015_16 = pd.read_csv('~/capstone_project/data/lineup_data_2015_16.csv')
 raw_lineup_data_2014_15 = pd.read_csv('~/capstone_project/data/lineup_data_2014_15.csv')
 raw_lineup_data_2013_14 = pd.read_csv('~/capstone_project/data/lineup_data_2013_14.csv')
+raw_lineup_data_2012_13 = pd.read_csv('~/capstone_project/data/lineup_data_2012_13.csv')
+# raw_lineup_data_2012_13 = pd.read_csv('~/capstone_project/data/lineup_data_2012_13.csv')
 
-raw_lineup_data_dfs = [raw_lineup_data_2016_17,raw_lineup_data_2015_16, raw_lineup_data_2014_15,raw_lineup_data_2013_14]
+raw_lineup_data_dfs = [raw_lineup_data_2016_17,raw_lineup_data_2015_16, raw_lineup_data_2014_15,raw_lineup_data_2013_14,raw_lineup_data_2012_13]
 
 #read in the player clusters (model output)
-player_clusters = pd.read_csv('~/capstone_project/data/gmm_clusters.csv')
+player_clusters = pd.read_csv('~/capstone_project/data/composite_kmeans.csv')
 #####################################
 
 
@@ -101,13 +103,15 @@ def get_stat_significance(cluster_lineup_df, lineup_minute_min):
     clusters_lineups = clusters_lineups[clusters_lineups.MIN_TOT >= lineup_minute_min]
 
     #create set of all unique cluster combos
-    unique_cluster_combos = list(set(clusters_lineups['clusters'].tolist()))
+    unique_cluster_combos = sorted(list(set(clusters_lineups['clusters'].tolist())))
     clusters_lineups['net'] = clusters_lineups['points_scored'] - clusters_lineups['points_allowed']
     clusters_lineups['net_per_min'] = clusters_lineups['net']/clusters_lineups['MIN_TOT']
     net_min_cluster_combo_all = clusters_lineups['net_per_min'].tolist()
 
     aggregated_cluster_combos = clusters_lineups[['clusters','net','MIN_TOT']].groupby('clusters').sum()
     aggregated_cluster_combos['net_per_min'] = aggregated_cluster_combos['net']/aggregated_cluster_combos['MIN_TOT']
+    aggregated_cluster_combos.reset_index(inplace = True)
+    aggregated_cluster_combos.sort('clusters', inplace = True)
     unique_c_combos_net_min = aggregated_cluster_combos['net_per_min'].tolist()
 
     #create an array over the df of the net_plus_minus/min for each lineup
@@ -121,54 +125,26 @@ def get_stat_significance(cluster_lineup_df, lineup_minute_min):
     lst_of_dicts = []
     for cluster, net in zip(unique_cluster_combos, unique_c_combos_net_min):
         net_min_cluster_combo = clusters_lineups['net_per_min'][clusters_lineups.clusters == cluster].tolist()
+        cluster_combo_min = clusters_lineups[['clusters','MIN_TOT']].groupby('clusters').sum()
+        cluster_combo_min.reset_index(inplace = True)
+        cluster_combo_min = cluster_combo_min['MIN_TOT'][cluster_combo_min['clusters'] == cluster].sum()
         t_score, p_val = t(net_min_cluster_combo_all,net_min_cluster_combo, equal_var = False)
-        temp_dict = {'cluster_combo':cluster,'t_score':t_score, 'p_val':p_val, 'net_per_min':net}
+        temp_dict = {'cluster_combo':cluster,'min':cluster_combo_min,'t_score':t_score, 'p_val':round(p_val,5), 'net_per_min':net}
         lst_of_dicts.append(temp_dict)
 
     cluster_combo_scores = pd.DataFrame(lst_of_dicts)
+    cluster_combo_scores = cluster_combo_scores.sort('net_per_min')
+    cluster_combo_scores = cluster_combo_scores[cluster_combo_scores['p_val'] <= .1]
+    cluster_combo_scores = cluster_combo_scores[cluster_combo_scores['min'] >= 75]
+    cluster_combo_scores.sort('net_per_min',inplace = True, ascending = False )
+    cluster_combo_scores.drop('min', inplace = True, axis = 1)
+
+    aggregated_cluster_combos = aggregated_cluster_combos.sort('net_per_min', ascending = False)
+    aggregated_cluster_combos = aggregated_cluster_combos[aggregated_cluster_combos.MIN_TOT >= 60]
 
     return aggregated_cluster_combos, clusters_lineups, cluster_combo_scores
 
 
 
 lineup_cluster_df = add_clusters_to_lineups(raw_lineup_data_dfs,player_clusters)
-aggregated_cluster_combos, clusters_lineups, cluster_combo_scores = get_stat_significance(lineup_cluster_df,10)
-
-
-
-
-
-# #group by cluster, create plus_minus col
-# def aggregate_clusters(lineup_cluster_df):
-#
-#     '''
-#     INPUT:
-#     1) a dataframe of cluster combinations representing lineups and their stats
-#         (the output produced by 'add_clusters_to_lineups')
-#     OUTPUT:
-#     1) a dataframe of aggregated cluster combinations, sorted by net_plus_minus
-#     '''
-#     clusters_str = lineup_cluster_df['clusters'].apply(lambda x: ', '.join(x))
-#     lineup_cluster_df['clusters_str'] = clusters_str
-#     lineup_cluster_df = lineup_cluster_df[['lineup_ids','lineup_names','clusters_str','points_scored','points_allowed']]
-#     lineup_cluster_df = lineup_cluster_df[lineup_cluster_df.clusters_str.str.contains("X") == False]
-#
-#     grouped_clusters = lineup_cluster_df[['clusters_str','points_scored','points_allowed']].groupby('clusters_str').sum()
-#     grouped_clusters['net'] = grouped_clusters['points_scored'] - grouped_clusters['points_allowed']
-#     grouped_clusters.sort('net', ascending = False, inplace = True)
-#
-#     grouped_clusters.to_csv('~/capstone_project/data/clusters_lineups.csv')
-#
-#     return grouped_clusters
-
-
-
-
-
-# # # if __name__ == '__main__':
-#     #read in lineup data and set of player clusters
-#     # lineup_data = pd.read_csv('~/capstone_project/data/lineup_data_2015_16.csv')
-#     # player_clusters = pd.read_csv('~/capstone_project/data/h_clusters_2015_16.csv')
-#     lineup_cluster_df = add_clusters_to_lineups(lineup_data,player_clusters)
-#     cluster_combo_stats = get_stat_significance(lineup_cluster_df)
-# #     grouped_df = aggregate_clusters(lineup_cluster_df)
+aggregated_cluster_combos, clusters_lineups, cluster_combo_scores = get_stat_significance(lineup_cluster_df,15)

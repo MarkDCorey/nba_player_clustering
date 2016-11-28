@@ -2,6 +2,7 @@ from __future__ import print_function
 import os
 import numpy as np
 import pandas as pd
+from sklearn import decomposition
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import scale, normalize,StandardScaler
 from collections import Counter
@@ -132,16 +133,46 @@ def plot_k_sse(X, min_k, max_k):
     plt.show()
 
 
+
+
+    k1,k2,k3 = [data[np.where(kmeans_labels==i)] for i in range(3)]
+    Xred, evals, evecs = dim_red_pca(SN,2)
+
+    xlab = '1. PC - ExpVar = {:.2f} %'.format(evals[0]/sum(evals)*100) # determine variance portion
+    ylab = '2. PC - ExpVar = {:.2f} %'.format(evals[1]/sum(evals)*100)
+    # plot the clusters, each set separately
+    plt.figure()
+    ax = plt.gca()
+    scatterHs = []
+    clr = ['r', 'b', 'k']
+    for cluster in set(labels_):
+        scatterHs.append(ax.scatter(Xred[labels_ == cluster, 0], Xred[labels_ == cluster, 1],
+                   color=clr[cluster], label='Cluster {}'.format(cluster)))
+    plt.legend(handles=scatterHs,loc=4)
+    plt.setp(ax, title='First and Second Principle Components', xlabel=xlab, ylabel=ylab)
+    # plot also the eigenvectors for deriving the influence of each feature
+    fig, ax = plt.subplots(2,1)
+    ax[0].bar([1, 2, 3, 4],evecs[0])
+    plt.setp(ax[0], title="First and Second Component's Eigenvectors ", ylabel='Weight')
+    ax[1].bar([1, 2, 3, 4],evecs[1])
+    plt.setp(ax[1], xlabel='Features', ylabel='Weight')
+
+
+
 if __name__ == '__main__':
     #read in the aggregated/saved data into a df
     featurized_data = pd.read_csv('~/capstone_project/data/featurized_data.csv')
-    player_mat = featurized_data[featurized_data.min_tot >500]
+    player_mat = featurized_data[featurized_data.min_tot >200]
     player_info = player_mat[['player_id','display_name']]
     player_mat.drop(['player_id','display_name','min_tot','gp'], inplace = True, axis = 1)
     player_mat.fillna(0, inplace = True)
-    player_mat = scale(player_mat)
+    player_mat = normalize(player_mat)
 
-    k_vals = [4,5,6,7,8,9,10,11,12,13,14]
+    pca = decomposition.PCA(n_components=15) #, whiten=True
+    player_mat = pca.fit_transform(player_mat)
+    player_mat = normalize(player_mat)
+
+    k_vals = [5,6,7,8,9,10,11,12,13,14]
     inertia_list = []
     for i in k_vals:
         kmeans = KMeans(n_clusters=i, init='k-means++', n_init=10, max_iter=300, tol=0.0001, \
@@ -155,11 +186,26 @@ if __name__ == '__main__':
         print('k_val: ',i)
         print('s_score: ',s_score)
         print('total_inertia: ',kmeans.inertia_)
+        print
 
     plt.plot(k_vals, inertia_list)
     plt.xlabel('k')
     plt.ylabel('sum of error')
     plt.show()
 
-    silhouette_analysis(player_mat)
+
+    # pca = decomposition.PCA(n_components=9, whiten = True) #, whiten=True
+    # fit_pca = pca.fit_transform(player_mat)
+    # # fit_pca = normalize(fit_pca)
+
+    # kmeans = KMeans(n_clusters=10, init='k-means++', n_init=10, max_iter=300, tol=0.0001, \
+    #     precompute_distances='auto', verbose=0, random_state=None, copy_x=True, n_jobs=1, algorithm='auto')
+    # kmeans.fit_transform(player_mat)
+    # cluster_labels = kmeans.labels_
+    # player_info['cluster'] = cluster_labels
+
+    # player_info.to_csv('~/capstone_project/data/clustered_players.csv')
+
+
+    # silhouette_analysis(player_mat)
     # test_players.to_csv('~/capstone_project/data/cluster_test.csv')

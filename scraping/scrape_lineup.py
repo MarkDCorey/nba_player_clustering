@@ -30,8 +30,8 @@ def get_lineups(team_id_lst,season = '2016-17'):
             TOV = float(team_lineups.iloc[j]['TOV'])
 
             lst_of_dicts.append({'lineup_ids':lineup_ids,'lineup_names':lineup_names,
-                                 'points_scored':points_scored,
-                                 'points_allowed':points_allowed,
+                                 'points_scored':(points_scored * GP),
+                                 'points_allowed':(points_allowed * GP),
                                  'FGA_l':(FGA * GP),
                                  'FTA_l':(FTA * GP),
                                  'OREB_l':(OREB * GP),
@@ -46,7 +46,7 @@ def get_lineups(team_id_lst,season = '2016-17'):
 
 
 if __name__ == '__main__':
-    year = '2012-13'
+    year = '2013-14'
     team_ids = get_team_ids()
     lineups_df = get_lineups(team_ids, season=year)
-    lineups_df.to_csv('~/capstone_project/data/lineup_data_2012_13.csv')
+    lineups_df.to_csv('~/capstone_project/data/lineup_data_2013_14.csv')
