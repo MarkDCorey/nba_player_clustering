@@ -6,6 +6,13 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from sklearn.preprocessing import StandardScaler,normalize,scale
 
+big_clusters = pd.read_csv('~/capstone_project/data/big_clusters.csv')
+
+big_cluster_1 = big_clusters['player_id'][big_clusters.cluster == 1].tolist()
+big_cluster_2 = big_clusters['player_id'][big_clusters.cluster == 2].tolist()
+big_cluster_3 = big_clusters['player_id'][big_clusters.cluster == 3].tolist()
+
+#
 
 
 
@@ -14,10 +21,9 @@ player_mat = featurized_data[featurized_data.min_tot >200]
 player_info = player_mat[['player_id','display_name']]
 player_mat.drop(['player_id','display_name','min_tot','gp'], inplace = True, axis = 1)
 player_mat.fillna(0, inplace = True)
-# player_mat = normalize(player_mat)
 player_mat = normalize(player_mat)
 
-pca = decomposition.PCA(n_components=13) #, whiten=True
+pca = decomposition.PCA(n_components=8) #, whiten=True
 player_mat = pca.fit_transform(player_mat)
 player_mat = normalize(player_mat)
 

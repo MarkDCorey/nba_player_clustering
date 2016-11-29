@@ -6,8 +6,8 @@ from sklearn.preprocessing import StandardScaler,normalize,scale
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_samples, silhouette_score
 
+#read in the feature data and the initial cluster assignments
 featurized_data = pd.read_csv('~/capstone_project/data/featurized_data.csv')
-
 big_clusters = pd.read_csv('~/capstone_project/data/big_clusters.csv')
 
 big_cluster_1 = big_clusters['player_id'][big_clusters.cluster == 1].tolist()

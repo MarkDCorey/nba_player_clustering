@@ -67,7 +67,7 @@ player_mat = preprocessing.scale(player_mat)
 fig = plt.figure(1, figsize=(8, 6))
 ax = Axes3D(fig, elev=-150, azim=110)
 X_reduced = decomposition.PCA(n_components=3).fit_transform(player_mat)
-ax.scatter(X_reduced[:, 0], X_reduced[:, 1], X_reduced[:, 2]) 
+ax.scatter(X_reduced[:, 0], X_reduced[:, 1], X_reduced[:, 2])
     # c=clusters_h,cmap=plt.cm.Paired)
 ax.set_title("First three PCA directions")
 ax.set_xlabel("1st eigenvector")
@@ -148,28 +148,32 @@ plt.show()
 # scree_plot(15, pca)
 #
 #
-# var_ex = pca.explained_variance_ratio_
-# tot_var_ex = np.array([sum(var_ex[0:i+1]) for i,x in enumerate(var_ex)])
-#
-# plt.figure(figsize=(12,4))
-# # plt.title("PCA", fontsize=14)
-#
-# plt.subplot(1,2,1)
-# plt.plot(range(1,len(tot_var_ex)+1), tot_var_ex*100,'o-')
-# plt.axis([0, len(tot_var_ex)+1, 0, 100])
-# plt.xlabel('Components Included', fontsize = 14)
-# plt.ylabel('Cumulative % of variance explained', fontsize = 14)
-#
-#
-# plt.subplot(1,2,2)
-# plt.plot(range(1,len(var_ex)+1), var_ex*100,'o-')
-# plt.axis([0, len(var_ex)+1, 0, 100])
-# plt.xlabel('Component Number', fontsize = 14)
-# plt.ylabel('% of variance explained by component', fontsize = 14)
-# plt.savefig("PCA.png", dpi= 300)
-#
-#
-# plt.show()
+
+pca = decomposition.PCA(n_components=11) #, whiten=True
+pca = pca.fit_transform(player_mat)
+
+var_ex = pca.explained_variance_ratio_
+tot_var_ex = np.array([sum(var_ex[0:i+1]) for i,x in enumerate(var_ex)])
+
+plt.figure(figsize=(12,4))
+# plt.title("PCA", fontsize=14)
+
+plt.subplot(1,2,1)
+plt.plot(range(1,len(tot_var_ex)+1), tot_var_ex*100,'o-')
+plt.axis([0, len(tot_var_ex)+1, 0, 100])
+plt.xlabel('Components Included', fontsize = 14)
+plt.ylabel('Cumulative % of variance explained', fontsize = 14)
+
+
+plt.subplot(1,2,2)
+plt.plot(range(1,len(var_ex)+1), var_ex*100,'o-')
+plt.axis([0, len(var_ex)+1, 0, 100])
+plt.xlabel('Component Number', fontsize = 14)
+plt.ylabel('% of variance explained by component', fontsize = 14)
+plt.savefig("PCA.png", dpi= 300)
+
+
+plt.show()
 #
 #
 # def plot_embedding(X, y, title=None):

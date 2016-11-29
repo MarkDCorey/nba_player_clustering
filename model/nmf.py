@@ -7,52 +7,6 @@ from sklearn.metrics import silhouette_score
 from sklearn.cluster import KMeans
 
 
-# featurized_data = pd.read_csv('~/capstone_project/data/featurized_data.csv')
-# player_mat = featurized_data[featurized_data.min_tot >800]
-# player_info_off = player_mat[['player_id','display_name']]
-# player_info_def= player_mat[['player_id','display_name']]
-# player_mat.drop(['Unnamed: 0','player_id','display_name','mi_def_min','mi_off_min','pass_min','season_exp','min_game','min_tot'], inplace = True, axis = 1)
-#
-#
-# off_cols = ['attempt_at_rim_2_min', 'attempt_cut_run_2_min',
-#                 'attempt_drive_2_min', 'attempt_jumper_2_min',
-#                 'attempt_jumper_3_min', 'attempt_off_dribble_2_min',
-#                 'attempt_off_dribble_3_min', 'attempt_post_2_min', 'eff_at_rim_2',
-#                 'eff_cut_run_2', 'eff_drive_2', 'eff_jumper_2', 'eff_jumper_3',
-#                 'eff_off_dribble_2', 'eff_off_dribble_3', 'eff_post_2', 'ast_min',
-#                 'oreb_min', 'fta_min', 'tov_min','eff_ft', 'ast_tov', 'c_oreb_min']
-#
-# def_cols = ['blk_min', 'blk_a_min','dreb_min','stl_min','c_dreb_min','d_fga_paint_min', 'd_fga_perim_min',
-#     'd_fga_mid_min','d_fga_threes_min', 'd_eff_paint', 'd_eff_perim', 'd_eff_mid','d_eff_threes']
-#
-#
-# shooting_cols = ['attempt_at_rim_2_min', 'attempt_cut_run_2_min',
-#                 'attempt_drive_2_min', 'attempt_jumper_2_min',
-#                 'attempt_jumper_3_min', 'attempt_off_dribble_2_min',
-#                 'attempt_off_dribble_3_min', 'attempt_post_2_min', 'eff_at_rim_2',
-#                 'eff_cut_run_2', 'eff_drive_2', 'eff_jumper_2', 'eff_jumper_3',
-#                 'eff_off_dribble_2', 'eff_off_dribble_3', 'eff_post_2']
-#
-#
-# #create two feature mats
-# player_mat_off = player_mat[off_cols]
-# player_info_off.set_index(player_info_off.player_id,inplace = True, drop = True)
-# features_off = player_mat_off.columns
-#
-# player_mat_def = player_mat[def_cols]
-# player_info_def.set_index(player_info_def.player_id,inplace = True, drop = True)
-# features_def = player_mat_def.columns
-#
-#
-# #prep each for algos
-# player_mat_off.fillna(0, inplace = True)
-# player_mat_off = normalize(player_mat_off)
-#
-# player_mat_def.fillna(0, inplace = True)
-# player_mat_def = normalize(player_mat_def)
-
-
-
 featurized_data = pd.read_csv('~/capstone_project/data/featurized_data.csv')
 player_mat = featurized_data[featurized_data.min_tot >200]
 player_info = player_mat[['player_id','display_name']]
