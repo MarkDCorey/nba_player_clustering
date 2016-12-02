@@ -1,36 +1,36 @@
-# nba_player_clustering
+NBA PLAYER TYPES AND OPTIMAL LINEUP COMPOSITION
+
 
 PROJECT DESCRIPTION
 
-Determine whether we can meaningfully cluster players NBA players by "type"
+-Determine whether we can meaningfully cluster players NBA players by style of play.
+
+-Overlay player clusters on top of lineup performance data to find optimal cluster/lineup compositions.
 
 
-Use this info to determine whether there are optimal compositions of player types when forming teams and lineups.  If there are optimal compositions, we can potentially....
+APPLICATIONS
 
-  -identify latent improvement opportunities for any team (eg new lineups to test,     prioritization of players to pursue via free-agency or trade).
+-Identify latent improvement opportunities (eg lineup composition, players to pursue through trade, draft or free-agency) for any team .
 
-  -predict any player's value to any team.
+-Project rookie and college player cluster and NBA player comps.
 
-  -determine whether optimal team/lineup compositions have changed over time.
+-Determine unique player values across team.
 
-  -determine whether new trends in team/lineup compositions are developing.
+-Determine whether optimal team/lineup compositions have changed over time and whether new trends in team/lineup compositions are developing.
 
 
 PROCESS OUTLINE
 
--Identify player feature set and k value, and build player clusters.
+-Scrape player and lineup statistics from NBA.com/Stats
 
--Merge the resulting cluster labels with NBA's lineup data and translate each lineup into appropriate cluster labels
+-Identify feature set that captures per-possession offensive and defensive actions of players
 
--Aggregate identical cluster combos
+-Build clustering model
 
--Index and sort the cluster combos by a weighted average of NetRating, then determine statistical significance of the "best" cluster combos
+-Measure within-cluster inertia and cluster separation, and determine optimal k cluster value
 
+-Describe characteristic features of each cluster
 
-ANALYSIS
+-Merge the resulting cluster labels with lineup level data
 
--Understand the characteristic features of each cluster
-
--Score players within clusters and use these rankings, along with the cluster rankings, to identify areas of opportunity for the teams
-
--Look for patterns of changing composition over time and whether new patterns are emerging.
+-Group by cluster combination and determine statistical significance of each 
