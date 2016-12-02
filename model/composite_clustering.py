@@ -230,23 +230,24 @@ dist_1_3 = sum_squared_dist(mat_1_3, cent_1_3)
 inertia_mat_1 = dist_1_1 + dist_1_2 + dist_1_3
 
 
-cent_2 = np.mean(player_mat_2[:,:], axis=0)
 player_mat_2_df = pd.DataFrame(player_mat_2)
 player_info_2.reset_index(inplace = True)
 player_mat_2_df['cluster'] = player_info_2['cluster']
 mat_2_4 = player_mat_2_df[player_mat_2_df.cluster == 4]
 mat_2_4.drop('cluster', inplace = True, axis = 1)
 mat_2_5= player_mat_2_df[player_mat_2_df.cluster == 5]
-mat_1_5.drop('cluster', inplace = True, axis = 1)
+mat_2_5.drop('cluster', inplace = True, axis = 1)
 mat_2_6 = player_mat_2_df[player_mat_2_df.cluster == 6]
 mat_2_6.drop('cluster', inplace = True, axis = 1)
-dist_2_4 = sum_squared_dist(mat_2_4, cent_2)
-dist_2_5 = sum_squared_dist(mat_2_5, cent_2)
-dist_2_6 = sum_squared_dist(mat_2_6, cent_2)
+cent_2_4 = np.mean(mat_2_4.as_matrix()[:,:], axis=0)
+cent_2_5 = np.mean(mat_2_5.as_matrix()[:,:], axis=0)
+cent_2_6 = np.mean(mat_2_6.as_matrix()[:,:], axis=0)
+dist_2_4 = sum_squared_dist(mat_2_4, cent_2_4)
+dist_2_5 = sum_squared_dist(mat_2_5, cent_2_5)
+dist_2_6 = sum_squared_dist(mat_2_6, cent_2_6)
 inertia_mat_2 = dist_2_4 + dist_2_5 + dist_2_6
 
 
-cent_3 = np.mean(player_mat_3[:,:], axis=0)
 player_mat_3_df = pd.DataFrame(player_mat_3)
 player_info_3.reset_index(inplace = True)
 player_mat_3_df['cluster'] = player_info_3['cluster']
@@ -258,10 +259,14 @@ mat_3_9 = player_mat_3_df[player_mat_3_df.cluster == 9]
 mat_3_9.drop('cluster', inplace = True, axis = 1)
 mat_3_10 = player_mat_3_df[player_mat_3_df.cluster == 10]
 mat_3_10.drop('cluster', inplace = True, axis = 1)
-dist_3_7 = sum_squared_dist(mat_3_7, cent_3)
-dist_3_8 = sum_squared_dist(mat_3_8, cent_3)
-dist_3_9 = sum_squared_dist(mat_3_9, cent_3)
-dist_3_10 = sum_squared_dist(mat_3_10, cent_3)
+cent_3_7 = np.mean(mat_3_7.as_matrix()[:,:], axis=0)
+cent_3_8 = np.mean(mat_3_8.as_matrix()[:,:], axis=0)
+cent_3_9 = np.mean(mat_3_9.as_matrix()[:,:], axis=0)
+cent_3_10 = np.mean(mat_3_10.as_matrix()[:,:], axis=0)
+dist_3_7 = sum_squared_dist(mat_3_7, cent_3_7)
+dist_3_8 = sum_squared_dist(mat_3_8, cent_3_8)
+dist_3_9 = sum_squared_dist(mat_3_9, cent_3_9)
+dist_3_10 = sum_squared_dist(mat_3_10, cent_3_10)
 inertia_mat_3 = dist_3_7 + dist_3_8 + dist_3_9 + dist_3_10
 
 #group the cluster_dfs

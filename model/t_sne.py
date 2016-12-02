@@ -197,6 +197,7 @@ plt.show()
 # kmeans_3.fit_transform(player_mat_3_t)
 # cluster_labels_3 = kmeans_3.labels_
 # player_info_3['cluster'] = cluster_labels_3
+#player_info_3['cluster'].replace([0,1,2,3], [6,7,8,9], inplace=True)
 
 # #group the cluster_dfs
 # t_sne_clusters = pd.concat([player_info_1, player_info_2, player_info_3])

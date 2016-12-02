@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from scipy.stats import ttest_ind as t
+from scipy.stats import ttest_ind as t, norm
 from itertools import combinations
 
 '''
@@ -151,26 +151,121 @@ def get_stat_significance(cluster_lineup_df, lineup_minute_min):
 
 def get_three_combo(clusters_lineups_df):
     clusters_lineups = clusters_lineups_df
-    lineups = clusters_lineups_df.clusters.tolist()
 
-    lineups_int = []
-    for lineup in lineups:
-        lineup = lineup.split(',')
-        lineup = [int(s) for s in lineup]
-        lineup = sorted(lineup)
-        lineups_int.append(lineup)
-    lineups_int = sorted(lineups_int)
-
-    lst_of_indicies = []
-    cluster_combos = [x for x in range(10)]
-    combos = combinations(cluster_combos, 3)
+    #get list of cluster combos
+    clusters = [x for x in range(10)]
+    combos = combinations(clusters, 3)
     combos = map(list, combos)
     combos = sorted(list(combos))
 
-    # for combo in combos:
-    #     For lineup in
-    return lineups_int
+    #add clusters as list of ints
+    lineups_int = []
+    for i in xrange(clusters_lineups_df.shape[0]):
+        lineup = clusters_lineups_df['clusters'].iloc[i]
+        lineup = lineup.split(',')
+        lineup = [int(s) for s in lineup]
+        lineups_int.append(lineup)
+    clusters_lineups_df['lineups_i'] = pd.Series(lineups_int)
 
+    combo_3_lst_of_lsts = []
+    for i in xrange(clusters_lineups_df.shape[0]):
+        clusts = clusters_lineups_df['lineups_i'].iloc[i]
+        combo_3_lst = combinations(clusts, 3)
+        combo_3_lst = map(list, combo_3_lst)
+        combo_3_lst = sorted(list(combo_3_lst))
+        combo_3_lst_of_lsts.append(combo_3_lst)
+    clusters_lineups_df['combo_3_list'] = pd.Series(combo_3_lst_of_lsts)
+
+
+    lst_of_dicts = []
+    for c in combos:
+        for i in xrange(clusters_lineups_df.shape[0]):
+            if c in clusters_lineups_df['combo_3_list'].iloc[i]:
+                temp_dict = {'combo':str(c),
+                            'all_clusters': clusters_lineups_df['clusters'].iloc[i],
+                            'points_allowed':clusters_lineups_df['points_allowed'].iloc[i].sum(),
+                            'points_scored':clusters_lineups_df['points_scored'].iloc[i].sum(),
+                            'min_tot':clusters_lineups_df['MIN_TOT'].iloc[i].sum(),
+                            'net':clusters_lineups_df['net'].iloc[i].sum(),
+                            'net_per_min':clusters_lineups_df['net_per_min'].iloc[i].sum()
+                            }
+                lst_of_dicts.append(temp_dict)
+
+
+    combos_3_df = pd.DataFrame(lst_of_dicts)
+
+    aggregated_combos_3 = combos_3_df[['combo','net','min_tot']].groupby('combo').sum()
+    aggregated_combos_3['net_per_min'] = aggregated_combos_3['net']/aggregated_combos_3['min_tot']
+    aggregated_combos_3.reset_index(inplace = True)
+    aggregated_combos_3.sort('combo', inplace = True)
+    unique_combos_3_net_min = aggregated_combos_3['net_per_min'].tolist()
+
+    net_min_c3_combo_all = combos_3_df['net_per_min'].tolist()
+
+    combos = map(str, combos)
+
+    # lst_of_dicts = []
+    # for c3, net in zip(combos, unique_combos_3_net_min):
+    #     net_min_c3_combo = combos_3_df['net_per_min'][combos_3_df.combo == c3].tolist()
+    #     print net_min_c3_combo
+    #     c3_combo_min = combos_3_df[['combo','min_tot']].groupby('combo').sum()
+    #     c3_combo_min.reset_index(inplace = True)
+    #     c3_combo_min = c3_combo_min['min_tot'][c3_combo_min['combo'] == c3].sum()
+
+    #
+    #     t_score, p_val = t(net_min_c3_combo_all,net_min_c3_combo, equal_var = True)
+    #
+    #     temp_dict = {'c3_combo':c3,'min':c3_combo_min,'t_score':t_score, 'p_val':round(p_val,5), 'net_per_min':net}
+    #     lst_of_dicts.append(temp_dict)
+    #
+    # c3_combo_scores = pd.DataFrame(lst_of_dicts)
+    # c3_combo_scores = c3_combo_scores.sort('net_per_min')
+    # c3_combo_scores = c3_combo_scores[c3_combo_scores['p_val'] <= .1]
+    # # c3_combo_scores = c3_combo_scores[c3_combo_scores['min'] >= 75]
+    # c3_combo_scores.sort('net_per_min',inplace = True, ascending = False )
+    # c3_combo_scores.drop('min', inplace = True, axis = 1)
+
+
+
+
+    total_min_net = combos_3_df[['combo', 'net','min_tot']].groupby('combo').sum()
+    total_net = float(total_min_net['net'].sum())
+    total_min = float(total_min_net['min_tot'].sum())
+    total_net_min = total_net/total_min
+    total_row = combos_3_df.shape[0]
+
+
+    lst_of_dicts = []
+    for c3 in combos:
+
+        net_min_combo = float(aggregated_combos_3['net_per_min'][aggregated_combos_3.combo == c3])
+        print net_min_combo
+        total_min_combo = float(aggregated_combos_3['min_tot'][aggregated_combos_3.combo == c3])
+        print total_min_combo
+        row_combo = combos_3_df[combos_3_df.combo == c3].shape[0]
+        print row_combo
+
+        combos_min_limit = combos_3_df[combos_3_df.min_tot > 0]
+        std_c3 = np.std(np.array(aggregated_combos_3['net_per_min']))
+        print std_c3
+
+        z_score = (net_min_combo - 0)/std_c3
+        print z_score
+
+        p_val = norm.sf(abs(z_score))*2
+        print p_val
+
+        temp_dict = {'c3_combo':c3,'p_val':round(p_val,5),'z_score':z_score,'net_per_min':net_min_combo,'total_min_combo': total_min_combo,'observations':row_combo}
+        lst_of_dicts.append(temp_dict)
+
+    c3_combo_scores = pd.DataFrame(lst_of_dicts)
+    c3_combo_scores = c3_combo_scores.sort('net_per_min')
+    c3_combo_scores = c3_combo_scores[c3_combo_scores['p_val'] <= .1]
+    c3_combo_scores.sort('net_per_min',inplace = True, ascending = False )
+    # c3_combo_scores.drop('min_tot', inplace = True, axis = 1)
+
+
+    return total_net_min, lst_of_dicts, c3_combo_scores, aggregated_combos_3, combos_3_df
 
 
 
@@ -178,4 +273,4 @@ if __name__ == '__main__':
     # lineup_cluster_df = add_clusters_to_lineups(raw_lineup_data_dfs,player_clusters)
     # aggregated_cluster_combos, clusters_lineups, cluster_combo_scores = get_stat_significance(lineup_cluster_df,15)
     clusters_lineups = pd.read_csv('~/capstone_project/data/clusters_lineups.csv')
-    test = get_three_combo(clusters_lineups)
+    net_min, lst, test, test2, test3 = get_three_combo(clusters_lineups)
