@@ -39,4 +39,4 @@ PROCESS OUTLINE
 
 -Merged the resulting cluster labels for each player with the lineup level data. Used net-scoring-margin-per-minute as metric to compare lineup performance.
 
--Grouped lineup data by cluster combination and ran z-test for each cluster combination to determine the statistical significance of lift relative to the population of lineups.
+-Grouped lineup data by cluster combination and ran z-test for each cluster combination to determine the statistical significance of lift in net-scoring-margin-per-minute relative to the population of lineups.
